@@ -4,6 +4,7 @@ import android.content.Context
 import com.company.product.mobile.data.local.SessionStore
 import com.company.product.mobile.data.remote.AuthResponse
 import com.company.product.mobile.data.remote.NetworkModule
+import com.company.product.mobile.data.remote.UserDto
 import com.company.product.mobile.data.repository.AppRepository
 
 data class SessionUi(
@@ -20,6 +21,21 @@ class AppState(context: Context) {
 
     var session: SessionUi? = null
         private set
+
+    suspend fun restoreSession(): Boolean {
+        if (sessionStore.token().isNullOrBlank()) {
+            session = null
+            return false
+        }
+        return try {
+            session = repo.me().toSessionUi()
+            true
+        } catch (_: Exception) {
+            repo.logout()
+            session = null
+            false
+        }
+    }
 
     suspend fun login(email: String, password: String) {
         val auth = repo.login(email, password)
@@ -40,6 +56,14 @@ class AppState(context: Context) {
 
 private fun AuthResponse.toSessionUi() = SessionUi(
     userId = userId,
+    email = email,
+    fullName = fullName,
+    role = role,
+    avatarUrl = avatarUrl
+)
+
+private fun UserDto.toSessionUi() = SessionUi(
+    userId = id,
     email = email,
     fullName = fullName,
     role = role,

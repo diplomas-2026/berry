@@ -12,42 +12,51 @@ fun AppRoot() {
     val context = LocalContext.current
     val appState = remember { AppState(context) }
     val nav = rememberNavController()
-    var startDestination by remember { mutableStateOf("login") }
+    var ready by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        appState.restoreSession()
+        ready = true
+    }
 
     BerryTheme {
-        NavHost(navController = nav, startDestination = startDestination) {
-            composable("login") {
-                LoginScreen(
-                    onSuccess = {
-                        startDestination = "home"
-                        nav.navigate("home") {
-                            popUpTo("login") { inclusive = true }
+        if (!ready) {
+            CenterLoading()
+        } else {
+            val startDestination = if (appState.session != null) "home" else "login"
+            NavHost(navController = nav, startDestination = startDestination) {
+                composable("login") {
+                    LoginScreen(
+                        onSuccess = {
+                            nav.navigate("home") {
+                                popUpTo("login") { inclusive = true }
+                            }
+                        },
+                        appState = appState
+                    )
+                }
+                composable("home") {
+                    HomeScreen(
+                        session = appState.session,
+                        onOpen = { nav.navigate(it) },
+                        onLogout = {
+                            appState.logout()
+                            nav.navigate("login") {
+                                popUpTo(0)
+                            }
                         }
-                    },
-                    appState = appState
-                )
+                    )
+                }
+                composable("student_menu") { StudentMenuScreen(appState.repository()) }
+                composable("student_vouchers") { StudentVouchersScreen(appState.repository()) }
+                composable("student_qr") { StudentQrScreen(appState.repository()) }
+                composable("curator_students") { CuratorStudentsScreen(appState.repository()) }
+                composable("curator_issue") { CuratorIssueVoucherScreen(appState.repository()) }
+                composable("chef_menu") { ChefMenuScreen(appState.repository()) }
+                composable("chef_scan") { ChefScanScreen(appState.repository()) }
+                composable("admin_users") { AdminUsersScreen(appState.repository()) }
+                composable("profile") { ProfileScreen(appState) }
             }
-            composable("home") {
-                HomeScreen(
-                    session = appState.session,
-                    onOpen = { nav.navigate(it) },
-                    onLogout = {
-                        appState.logout()
-                        nav.navigate("login") {
-                            popUpTo(0)
-                        }
-                    }
-                )
-            }
-            composable("student_menu") { StudentMenuScreen(appState.repository()) }
-            composable("student_vouchers") { StudentVouchersScreen(appState.repository()) }
-            composable("student_qr") { StudentQrScreen(appState.repository()) }
-            composable("curator_students") { CuratorStudentsScreen(appState.repository()) }
-            composable("curator_issue") { CuratorIssueVoucherScreen(appState.repository()) }
-            composable("chef_menu") { ChefMenuScreen(appState.repository()) }
-            composable("chef_scan") { ChefScanScreen(appState.repository()) }
-            composable("admin_users") { AdminUsersScreen(appState.repository()) }
-            composable("profile") { ProfileScreen(appState) }
         }
     }
 }

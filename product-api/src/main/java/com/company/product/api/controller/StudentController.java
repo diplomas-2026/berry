@@ -1,8 +1,6 @@
 package com.company.product.api.controller;
 
 import com.company.product.api.dto.CommonDtos;
-import com.company.product.api.entity.MealVoucher;
-import com.company.product.api.entity.VoucherStatus;
 import com.company.product.api.repository.MealVoucherRepository;
 import com.company.product.api.repository.MenuItemRepository;
 import com.company.product.api.service.CurrentUserService;
@@ -46,10 +44,6 @@ public class StudentController {
     @GetMapping("/qr")
     public CommonDtos.QrPayload qr() {
         Long studentId = currentUserService.requireUser().getId();
-        List<MealVoucher> active = voucherRepository.findByStudentIdAndIssueDateAndStatus(studentId, LocalDate.now(), VoucherStatus.ISSUED);
-        if (active.isEmpty()) {
-            throw new IllegalStateException("Нет активных талонов на сегодня");
-        }
         return new CommonDtos.QrPayload(studentId, LocalDate.now());
     }
 }
