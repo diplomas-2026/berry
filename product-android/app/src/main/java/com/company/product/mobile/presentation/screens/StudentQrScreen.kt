@@ -27,7 +27,7 @@ fun StudentQrScreen(repo: AppRepository) {
 
     ScreenContainer("Мой QR") {
         if (loading) CenterLoading()
-        if (error != null) Text("Ошибка: $error")
+        if (error != null) ErrorCard(error!!)
         if (qr != null) {
             SectionCard(title = "Данные талона", subtitle = "Покажите этот экран повару") {
                 Text("studentId: ${qr!!.studentId}")

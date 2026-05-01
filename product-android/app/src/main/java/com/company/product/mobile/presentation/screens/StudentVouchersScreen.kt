@@ -27,7 +27,7 @@ fun StudentVouchersScreen(repo: AppRepository) {
 
     ScreenContainer("Мои талоны") {
         if (loading) CenterLoading()
-        if (error != null) Text("Ошибка: $error")
+        if (error != null) ErrorCard(error!!)
         vouchers.forEach {
             SectionCard(title = "Талон #${it.id}", subtitle = it.issueDate) {
                 Text("Приём пищи: ${it.mealSlot}")

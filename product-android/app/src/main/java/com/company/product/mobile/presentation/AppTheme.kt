@@ -44,14 +44,15 @@ private val AppTypography = Typography(
 fun BerryTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = DarkColors,
-        typography = AppTypography
-    ) {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = DarkColors.background,
-            contentColor = DarkColors.onBackground
-        ) {
-            content()
+        typography = AppTypography,
+        content = {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = DarkColors.background,
+                contentColor = DarkColors.onBackground
+            ) {
+                content()
+            }
         }
     )
 }

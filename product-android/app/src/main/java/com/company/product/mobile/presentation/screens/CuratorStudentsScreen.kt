@@ -27,7 +27,7 @@ fun CuratorStudentsScreen(repo: AppRepository) {
 
     ScreenContainer("Студенты группы") {
         if (loading) CenterLoading()
-        if (error != null) Text("Ошибка: $error")
+        if (error != null) ErrorCard(error!!)
         students.forEach {
             SectionCard(title = it.fullName, subtitle = it.email) {
                 Text("ID: ${it.id}")

@@ -27,7 +27,7 @@ fun StudentMenuScreen(repo: AppRepository) {
 
     ScreenContainer("Моё меню") {
         if (loading) CenterLoading()
-        if (error != null) Text("Ошибка: $error")
+        if (error != null) ErrorCard(error!!)
         items.forEach {
             SectionCard(title = "${it.mealSlot}: ${it.dish.name}", subtitle = it.date) {
                 if (!it.dish.description.isNullOrBlank()) Text(it.dish.description)

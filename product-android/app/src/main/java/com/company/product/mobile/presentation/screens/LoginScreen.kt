@@ -150,7 +150,7 @@ fun LoginScreen(appState: AppState, onSuccess: () -> Unit) {
                     )
 
                     if (error != null) {
-                        Text(error!!, color = MaterialTheme.colorScheme.error)
+                        ErrorCard(error!!, title = "Ошибка входа")
                     }
 
                     Button(
