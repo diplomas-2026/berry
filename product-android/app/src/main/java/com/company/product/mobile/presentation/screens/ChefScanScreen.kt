@@ -1,93 +1,187 @@
 package com.company.product.mobile.presentation.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.company.product.mobile.data.remote.ScanResultDto
 import com.company.product.mobile.data.repository.AppRepository
 import kotlinx.coroutines.launch
-import java.time.LocalDate
+import org.json.JSONObject
 
 @Composable
 fun ChefScanScreen(repo: AppRepository) {
-    var studentId by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf(LocalDate.now().toString()) }
-    var voucherIdForRedeem by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var cameraPermissionGranted by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+    var cameraActive by remember { mutableStateOf(true) }
     var scanResult by remember { mutableStateOf<ScanResultDto?>(null) }
     var message by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
+    var scannedOnce by remember { mutableStateOf(false) }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        cameraPermissionGranted = granted
+        message = if (granted) "" else "Для сканирования нужен доступ к камере"
+    }
+
+    LaunchedEffect(Unit) {
+        if (!cameraPermissionGranted) {
+            permissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
 
     ScreenContainer("Сканирование и погашение") {
-        SectionCard(title = "Проверка QR", subtitle = "Введите payload студента") {
-            OutlinedTextField(
-                value = studentId,
-                onValueChange = { studentId = it },
-                label = { Text("ID студента из QR") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            OutlinedTextField(
-                value = date,
-                onValueChange = { date = it },
-                label = { Text("Дата из QR (YYYY-MM-DD)") },
-                modifier = Modifier.fillMaxWidth()
+        if (!cameraPermissionGranted) {
+            EmptyStateCard(
+                title = "Нет доступа к камере",
+                subtitle = "Разрешите камеру, чтобы сканировать QR-код студента"
             )
             Button(
-                onClick = {
-                    scope.launch {
-                        loading = true
-                        try {
-                            scanResult = repo.chefScan(studentId.toLong(), date)
-                            message = "Проверка выполнена"
-                        } catch (e: Exception) {
-                            message = "Ошибка: ${e.message}"
-                        } finally {
-                            loading = false
-                        }
-                    }
-                },
-                enabled = !loading && studentId.isNotBlank(),
+                onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(if (loading) "Проверяем..." else "Проверить QR")
+                Text("Разрешить камеру")
+            }
+        } else {
+            SectionCard(
+                title = "Сканер QR",
+                subtitle = "Наведите камеру на QR-код студента"
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    androidx.compose.foundation.layout.Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(420.dp)
+                    ) {
+                        QrCameraScanner(
+                            enabled = cameraActive && !scannedOnce,
+                            onQrScanned = { raw ->
+                                if (scannedOnce || loading) return@QrCameraScanner
+                                val payload = runCatching { JSONObject(raw) }.getOrNull()
+                                if (payload == null) {
+                                    scannedOnce = true
+                                    cameraActive = false
+                                    message = "QR-код не содержит ожидаемые данные"
+                                    return@QrCameraScanner
+                                }
+                                val studentId = payload.optLong("studentId", -1L)
+                                val date = payload.optString("date", "")
+                                if (studentId <= 0 || date.isBlank()) {
+                                    scannedOnce = true
+                                    cameraActive = false
+                                    message = "QR-код имеет неверный формат"
+                                    return@QrCameraScanner
+                                }
+
+                                scannedOnce = true
+                                cameraActive = false
+                                scope.launch {
+                                    loading = true
+                                    try {
+                                        scanResult = repo.chefScan(studentId, date)
+                                        message = "QR-код успешно считан"
+                                    } catch (e: Exception) {
+                                        message = "Ошибка: ${e.message}"
+                                    } finally {
+                                        loading = false
+                                    }
+                                }
+                            }
+                        )
+                    }
+
+                    if (loading) {
+                        CenterLoading()
+                    }
+
+                    Button(
+                        onClick = {
+                            scannedOnce = false
+                            cameraActive = true
+                            scanResult = null
+                            message = ""
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Сканировать ещё раз")
+                    }
+                }
             }
         }
 
         if (scanResult != null) {
             SectionCard(title = "Студент", subtitle = scanResult!!.student.fullName) {
                 Text("Доступные талоны:")
-                scanResult!!.activeVouchers.forEach { Text("ID ${it.id} • ${mealSlotLabel(it.mealSlot)} • ${voucherStatusLabel(it.status)} • ${formatDate(it.issueDate)}") }
+                if (scanResult!!.activeVouchers.isEmpty()) {
+                    Text("Активных талонов нет")
+                } else {
+                    scanResult!!.activeVouchers.forEach { voucher ->
+                        SectionCard(
+                            title = "Талон #${voucher.id}",
+                            subtitle = "${mealSlotLabel(voucher.mealSlot)} • ${voucherStatusLabel(voucher.status)} • ${formatDate(voucher.issueDate)}"
+                        ) {
+                            Button(
+                                onClick = {
+                                    scope.launch {
+                                        loading = true
+                                        try {
+                                            val result = repo.chefRedeem(voucher.id)
+                                            message = "Погашено: #${result.id} (${mealSlotLabel(result.mealSlot)})"
+                                        } catch (e: Exception) {
+                                            message = "Ошибка погашения: ${e.message}"
+                                        } finally {
+                                            loading = false
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text("Погасить талон")
+                            }
+                        }
+                    }
+                }
                 Text("Блюда к выдаче:")
-                scanResult!!.menuItems.forEach { Text("${mealSlotLabel(it.mealSlot)}: ${it.dish.name}") }
+                if (scanResult!!.menuItems.isEmpty()) {
+                    Text("Для этого студента меню на выбранную дату не найдено")
+                } else {
+                    scanResult!!.menuItems.forEach {
+                        Text("${mealSlotLabel(it.mealSlot)}: ${it.dish.name}")
+                    }
+                }
             }
         }
 
-        SectionCard(title = "Погашение талона") {
-            OutlinedTextField(
-                value = voucherIdForRedeem,
-                onValueChange = { voucherIdForRedeem = it },
-                label = { Text("ID талона для погашения") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Button(
-                onClick = {
-                    scope.launch {
-                        try {
-                            val result = repo.chefRedeem(voucherIdForRedeem.toLong())
-                            message = "Погашено: #${result.id} (${mealSlotLabel(result.mealSlot)})"
-                        } catch (e: Exception) {
-                            message = "Ошибка погашения: ${e.message}"
-                        }
-                    }
-                },
-                enabled = voucherIdForRedeem.isNotBlank(),
-                modifier = Modifier.fillMaxWidth()
-            ) { Text("Погасить талон") }
+        if (message.isNotBlank()) {
+            if (message.startsWith("Ошибка")) {
+                ErrorCard(message)
+            } else {
+                EmptyStateCard(title = "Статус", subtitle = message)
+            }
         }
-
-        if (message.isNotBlank()) SectionCard(title = "Статус") { Text(message) }
     }
 }
