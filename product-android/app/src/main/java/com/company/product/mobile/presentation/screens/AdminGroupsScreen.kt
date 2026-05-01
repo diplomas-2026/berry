@@ -97,7 +97,7 @@ fun AdminGroupsScreen(repo: AppRepository) {
                     onValueChange = { query = it },
                     label = { Text("Поиск") },
                     placeholder = { Text("Название группы или куратор") },
-                    leadingIcon = { Icon(imageVector = Search, contentDescription = null) },
+                    leadingIcon = { Icon(imageVector = Icons.Filled.Search, contentDescription = null) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
