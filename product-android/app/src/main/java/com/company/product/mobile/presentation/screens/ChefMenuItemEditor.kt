@@ -8,15 +8,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -123,28 +123,33 @@ fun ChefMenuItemEditor(
                         label = { Text("Блюдо") },
                         placeholder = { Text("Выберите блюдо из списка") },
                         modifier = Modifier.fillMaxWidth()
-                            .clickable { dishMenuExpanded = true }
+                            .clickable { dishMenuExpanded = !dishMenuExpanded }
                     )
-                    DropdownMenu(
-                        expanded = dishMenuExpanded,
-                        onDismissRequest = { dishMenuExpanded = false },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        visibleDishes.forEach { dish ->
-                            DropdownMenuItem(
-                                text = { Text(dish.name) },
-                                onClick = {
-                                    onDishSelected(dish.id)
-                                    dishMenuExpanded = false
+                    if (dishMenuExpanded) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 240.dp)
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            visibleDishes.forEach { dish ->
+                                TextButton(
+                                    onClick = {
+                                        onDishSelected(dish.id)
+                                        dishMenuExpanded = false
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(dish.name)
                                 }
-                            )
+                            }
+                            if (visibleDishes.isEmpty()) {
+                                Text(
+                                    text = "Список блюд пока пуст",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
-                    }
-                    if (visibleDishes.isEmpty()) {
-                        Text(
-                            text = "Список блюд пока пуст",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
                     }
                 }
 
