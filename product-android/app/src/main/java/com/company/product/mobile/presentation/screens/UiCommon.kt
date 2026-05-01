@@ -17,40 +17,63 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScreenContainer(title: String, content: @Composable ColumnScope.() -> Unit) {
+fun ScreenContainer(
+    title: String,
+    showTopBar: Boolean = true,
+    content: @Composable ColumnScope.() -> Unit
+) {
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
-            TopAppBar(
-                title = { Text(title, style = MaterialTheme.typography.titleLarge) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
+            if (showTopBar) {
+                TopAppBar(
+                    title = { Text(title, style = MaterialTheme.typography.titleLarge) },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent
+                    )
                 )
-            )
+            }
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
-                    Brush.linearGradient(
+                    Brush.verticalGradient(
                         colors = listOf(
                             MaterialTheme.colorScheme.background,
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.35f),
-                            MaterialTheme.colorScheme.background
+                            MaterialTheme.colorScheme.background.copy(alpha = 0.98f),
+                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)
                         )
                     )
                 )
+                .drawBehind {
+                    val stroke = 1.2f
+                    val color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.28f)
+                    val step = 92f
+                    var y = 0f
+                    while (y < size.height + step) {
+                        drawLine(color = color, start = Offset(0f, y), end = Offset(size.width, y), strokeWidth = stroke)
+                        y += step
+                    }
+                }
                 .padding(innerPadding)
+                .windowInsetsPadding(WindowInsets.systemBars)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -100,6 +123,6 @@ fun StatusPill(text: String) {
         shape = RoundedCornerShape(999.dp),
         border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
-        Text(text = text, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium)
+        Text(text = text, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp), style = MaterialTheme.typography.labelMedium.copy(letterSpacing = 0.sp))
     }
 }
