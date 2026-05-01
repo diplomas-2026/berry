@@ -18,7 +18,7 @@ fun ProfileScreen(appState: AppState) {
     val repo = appState.repository()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var avatarUrl by remember { mutableStateOf(appState.session?.avatarUrl) }
+    val avatarUrl = appState.session?.avatarUrl
     var message by remember { mutableStateOf("") }
     var selectedUri by remember { mutableStateOf<Uri?>(null) }
 
@@ -46,7 +46,8 @@ fun ProfileScreen(appState: AppState) {
                     scope.launch {
                         try {
                             val updated = repo.uploadAvatar(context, uri)
-                            avatarUrl = updated.avatarUrl
+                            appState.updateSessionAvatar(updated.avatarUrl)
+                            selectedUri = null
                             message = "Аватар обновлен"
                         } catch (e: Exception) {
                             message = "Ошибка загрузки: ${e.message}"
@@ -60,7 +61,8 @@ fun ProfileScreen(appState: AppState) {
                 scope.launch {
                     try {
                         val updated = repo.deleteAvatar()
-                        avatarUrl = updated.avatarUrl
+                        appState.updateSessionAvatar(updated.avatarUrl)
+                        selectedUri = null
                         message = "Аватар удалён"
                     } catch (e: Exception) {
                         message = "Ошибка: ${e.message}"

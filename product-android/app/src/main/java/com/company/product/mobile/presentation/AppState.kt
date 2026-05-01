@@ -19,7 +19,7 @@ class AppState(context: Context) {
     private val sessionStore = SessionStore(context.applicationContext)
     private val repo = AppRepository(NetworkModule.api(context.applicationContext), sessionStore)
 
-    var session: SessionUi? = null
+    var session by mutableStateOf<SessionUi?>(null)
         private set
 
     suspend fun restoreSession(): Boolean {
@@ -40,6 +40,10 @@ class AppState(context: Context) {
     suspend fun login(email: String, password: String) {
         val auth = repo.login(email, password)
         session = auth.toSessionUi()
+    }
+
+    fun updateSessionAvatar(avatarUrl: String?) {
+        session = session?.copy(avatarUrl = avatarUrl)
     }
 
     fun setSessionFromAuth(auth: AuthResponse) {
