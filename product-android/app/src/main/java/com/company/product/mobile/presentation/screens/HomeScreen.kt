@@ -2,22 +2,19 @@ package com.company.product.mobile.presentation.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.weight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Dining
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.RestaurantMenu
-import androidx.compose.material.icons.filled.Logout
-import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -33,7 +30,11 @@ fun HomeScreen(session: SessionUi?, onOpen: (String) -> Unit, onLogout: () -> Un
             StatusPill("Роль: ${roleLabel(session?.role)}")
         }
 
-        SectionCard(title = "Разделы", subtitle = "Откройте нужный экран") {
+        SectionCard(
+            title = "Разделы",
+            subtitle = "Откройте нужный экран",
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.20f)
+        ) {
             val entries = when (session?.role) {
                 "STUDENT" -> listOf(
                     HomeTile("Моё меню", Icons.Default.RestaurantMenu) { onOpen("student_menu") },
@@ -57,7 +58,11 @@ fun HomeScreen(session: SessionUi?, onOpen: (String) -> Unit, onLogout: () -> Un
             TileGrid(entries)
         }
 
-        SectionCard(title = "Аккаунт", subtitle = "Профиль и выход") {
+        SectionCard(
+            title = "Аккаунт",
+            subtitle = "Профиль и выход",
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.16f)
+        ) {
             TileGrid(
                 listOf(
                     HomeTile("Профиль", Icons.Default.Person) { onOpen("profile") },
