@@ -1,6 +1,5 @@
 package com.company.product.mobile.presentation
 
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
@@ -15,7 +14,7 @@ fun AppRoot() {
     val nav = rememberNavController()
     var startDestination by remember { mutableStateOf("login") }
 
-    MaterialTheme {
+    BerryTheme {
         NavHost(navController = nav, startDestination = startDestination) {
             composable("login") {
                 LoginScreen(

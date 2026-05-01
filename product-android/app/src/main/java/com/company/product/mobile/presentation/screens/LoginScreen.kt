@@ -1,7 +1,11 @@
 package com.company.product.mobile.presentation.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -21,6 +25,20 @@ fun LoginScreen(appState: AppState, onSuccess: () -> Unit) {
     val scope = rememberCoroutineScope()
 
     ScreenContainer("Вход") {
+        SectionCard(
+            title = "Питание ПГК",
+            subtitle = "Система управления талонами и меню"
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Icon(
+                    imageVector = Icons.Default.School,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text("Быстрый доступ для студентов, поваров, кураторов и администраторов")
+            }
+        }
+
         SectionCard(
             title = "Авторизация",
             subtitle = "Введите данные учётной записи"
@@ -55,7 +73,10 @@ fun LoginScreen(appState: AppState, onSuccess: () -> Unit) {
                     }
                 },
                 enabled = !loading,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
             ) {
                 Text(if (loading) "Входим..." else "Войти")
             }
