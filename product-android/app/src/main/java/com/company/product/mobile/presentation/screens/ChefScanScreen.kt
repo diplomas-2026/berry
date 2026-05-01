@@ -22,67 +22,72 @@ fun ChefScanScreen(repo: AppRepository) {
     val scope = rememberCoroutineScope()
 
     ScreenContainer("Сканирование и погашение") {
-        OutlinedTextField(
-            value = studentId,
-            onValueChange = { studentId = it },
-            label = { Text("studentId из QR") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        OutlinedTextField(
-            value = date,
-            onValueChange = { date = it },
-            label = { Text("date из QR (YYYY-MM-DD)") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Button(
-            onClick = {
-                scope.launch {
-                    loading = true
-                    try {
-                        scanResult = repo.chefScan(studentId.toLong(), date)
-                        message = "Проверка выполнена"
-                    } catch (e: Exception) {
-                        message = "Ошибка: ${e.message}"
-                    } finally {
-                        loading = false
+        SectionCard(title = "Проверка QR", subtitle = "Введите payload студента") {
+            OutlinedTextField(
+                value = studentId,
+                onValueChange = { studentId = it },
+                label = { Text("studentId из QR") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = date,
+                onValueChange = { date = it },
+                label = { Text("date из QR (YYYY-MM-DD)") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Button(
+                onClick = {
+                    scope.launch {
+                        loading = true
+                        try {
+                            scanResult = repo.chefScan(studentId.toLong(), date)
+                            message = "Проверка выполнена"
+                        } catch (e: Exception) {
+                            message = "Ошибка: ${e.message}"
+                        } finally {
+                            loading = false
+                        }
                     }
-                }
-            },
-            enabled = !loading && studentId.isNotBlank(),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(if (loading) "Проверяем..." else "Проверить QR")
+                },
+                enabled = !loading && studentId.isNotBlank(),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(if (loading) "Проверяем..." else "Проверить QR")
+            }
         }
 
         if (scanResult != null) {
-            Text("Студент: ${scanResult!!.student.fullName}")
-            Text("Доступные талоны:")
-            scanResult!!.activeVouchers.forEach { Text("ID ${it.id} | ${it.mealSlot} | ${it.status}") }
-            Text("Блюда к выдаче:")
-            scanResult!!.menuItems.forEach { Text("${it.mealSlot}: ${it.dish.name}") }
+            SectionCard(title = "Студент", subtitle = scanResult!!.student.fullName) {
+                Text("Доступные талоны:")
+                scanResult!!.activeVouchers.forEach { Text("ID ${it.id} • ${it.mealSlot} • ${it.status}") }
+                Text("Блюда к выдаче:")
+                scanResult!!.menuItems.forEach { Text("${it.mealSlot}: ${it.dish.name}") }
+            }
         }
 
-        OutlinedTextField(
-            value = voucherIdForRedeem,
-            onValueChange = { voucherIdForRedeem = it },
-            label = { Text("ID талона для погашения") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Button(
-            onClick = {
-                scope.launch {
-                    try {
-                        val result = repo.chefRedeem(voucherIdForRedeem.toLong())
-                        message = "Погашено: #${result.id} (${result.mealSlot})"
-                    } catch (e: Exception) {
-                        message = "Ошибка погашения: ${e.message}"
+        SectionCard(title = "Погашение талона") {
+            OutlinedTextField(
+                value = voucherIdForRedeem,
+                onValueChange = { voucherIdForRedeem = it },
+                label = { Text("ID талона для погашения") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Button(
+                onClick = {
+                    scope.launch {
+                        try {
+                            val result = repo.chefRedeem(voucherIdForRedeem.toLong())
+                            message = "Погашено: #${result.id} (${result.mealSlot})"
+                        } catch (e: Exception) {
+                            message = "Ошибка погашения: ${e.message}"
+                        }
                     }
-                }
-            },
-            enabled = voucherIdForRedeem.isNotBlank(),
-            modifier = Modifier.fillMaxWidth()
-        ) { Text("Погасить талон") }
+                },
+                enabled = voucherIdForRedeem.isNotBlank(),
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Погасить талон") }
+        }
 
-        if (message.isNotBlank()) Text(message)
+        if (message.isNotBlank()) SectionCard(title = "Статус") { Text(message) }
     }
 }

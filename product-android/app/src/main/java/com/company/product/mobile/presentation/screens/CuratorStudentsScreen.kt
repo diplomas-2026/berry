@@ -29,7 +29,9 @@ fun CuratorStudentsScreen(repo: AppRepository) {
         if (loading) CenterLoading()
         if (error != null) Text("Ошибка: $error")
         students.forEach {
-            Text("${it.id} | ${it.fullName} | ${it.email}")
+            SectionCard(title = it.fullName, subtitle = it.email) {
+                Text("ID: ${it.id}")
+            }
         }
     }
 }

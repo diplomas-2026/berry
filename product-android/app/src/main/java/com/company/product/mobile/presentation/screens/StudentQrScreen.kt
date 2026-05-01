@@ -29,9 +29,11 @@ fun StudentQrScreen(repo: AppRepository) {
         if (loading) CenterLoading()
         if (error != null) Text("Ошибка: $error")
         if (qr != null) {
-            Text("studentId: ${qr!!.studentId}")
-            Text("date: ${qr!!.date}")
-            Text("Эти поля используются как payload для сканирования поваром.")
+            SectionCard(title = "Данные талона", subtitle = "Покажите этот экран повару") {
+                Text("studentId: ${qr!!.studentId}")
+                Text("date: ${qr!!.date}")
+                Text("Эти поля используются как payload для сканирования.")
+            }
         }
     }
 }

@@ -37,40 +37,45 @@ fun AdminUsersScreen(repo: AppRepository) {
     LaunchedEffect(Unit) { reload() }
 
     ScreenContainer("Пользователи") {
-        Button(onClick = { reload() }, modifier = Modifier.fillMaxWidth()) { Text("Обновить список") }
-        if (loading) CenterLoading()
-        users.forEach { user ->
-            Text("${user.id} | ${user.fullName} | ${user.role} | active=${user.active}")
+        SectionCard(title = "Список пользователей") {
+            Button(onClick = { reload() }, modifier = Modifier.fillMaxWidth()) { Text("Обновить список") }
+            if (loading) CenterLoading()
+            users.forEach { user ->
+                SectionCard(title = user.fullName, subtitle = "${user.email} • ${user.role}") {
+                    StatusPill(if (user.active) "Активен" else "Отключён")
+                    Button(onClick = {
+                        scope.launch {
+                            try {
+                                repo.adminSetActive(user.id, !user.active)
+                                reload()
+                            } catch (e: Exception) {
+                                message = "Ошибка: ${e.message}"
+                            }
+                        }
+                    }, modifier = Modifier.fillMaxWidth()) {
+                        Text(if (user.active) "Деактивировать" else "Активировать")
+                    }
+                }
+            }
+        }
+
+        SectionCard(title = "Создание пользователя") {
+            OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = password, onValueChange = { password = it }, label = { Text("Пароль") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = fullName, onValueChange = { fullName = it }, label = { Text("ФИО") }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = role, onValueChange = { role = it }, label = { Text("Роль (ADMIN/CURATOR/CHEF/STUDENT)") }, modifier = Modifier.fillMaxWidth())
             Button(onClick = {
                 scope.launch {
                     try {
-                        repo.adminSetActive(user.id, !user.active)
+                        repo.adminCreateUser(email.trim(), password, fullName, role.trim().uppercase())
+                        message = "Пользователь создан"
                         reload()
                     } catch (e: Exception) {
                         message = "Ошибка: ${e.message}"
                     }
                 }
-            }, modifier = Modifier.fillMaxWidth()) {
-                Text(if (user.active) "Деактивировать" else "Активировать")
-            }
+            }, modifier = Modifier.fillMaxWidth()) { Text("Создать пользователя") }
         }
-
-        Text("Создание пользователя")
-        OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(value = password, onValueChange = { password = it }, label = { Text("Пароль") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(value = fullName, onValueChange = { fullName = it }, label = { Text("ФИО") }, modifier = Modifier.fillMaxWidth())
-        OutlinedTextField(value = role, onValueChange = { role = it }, label = { Text("Роль (ADMIN/CURATOR/CHEF/STUDENT)") }, modifier = Modifier.fillMaxWidth())
-        Button(onClick = {
-            scope.launch {
-                try {
-                    repo.adminCreateUser(email.trim(), password, fullName, role.trim().uppercase())
-                    message = "Пользователь создан"
-                    reload()
-                } catch (e: Exception) {
-                    message = "Ошибка: ${e.message}"
-                }
-            }
-        }, modifier = Modifier.fillMaxWidth()) { Text("Создать пользователя") }
-        if (message.isNotBlank()) Text(message)
+        if (message.isNotBlank()) SectionCard(title = "Статус") { Text(message) }
     }
 }

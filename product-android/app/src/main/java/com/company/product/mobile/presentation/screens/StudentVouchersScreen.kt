@@ -29,7 +29,10 @@ fun StudentVouchersScreen(repo: AppRepository) {
         if (loading) CenterLoading()
         if (error != null) Text("Ошибка: $error")
         vouchers.forEach {
-            Text("#${it.id} | ${it.issueDate} | ${it.mealSlot} | ${it.status}")
+            SectionCard(title = "Талон #${it.id}", subtitle = it.issueDate) {
+                Text("Приём пищи: ${it.mealSlot}")
+                StatusPill(it.status)
+            }
         }
     }
 }

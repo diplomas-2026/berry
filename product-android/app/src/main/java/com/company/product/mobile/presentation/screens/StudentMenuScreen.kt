@@ -29,8 +29,16 @@ fun StudentMenuScreen(repo: AppRepository) {
         if (loading) CenterLoading()
         if (error != null) Text("Ошибка: $error")
         items.forEach {
-            Text("${it.mealSlot}: ${it.dish.name}")
-            if (!it.dish.description.isNullOrBlank()) Text(it.dish.description)
+            SectionCard(title = "${it.mealSlot}: ${it.dish.name}", subtitle = it.date) {
+                if (!it.dish.description.isNullOrBlank()) Text(it.dish.description)
+                val nutrition = listOfNotNull(
+                    it.dish.proteinsPer100g?.let { v -> "Б: ${v}г" },
+                    it.dish.fatsPer100g?.let { v -> "Ж: ${v}г" },
+                    it.dish.carbsPer100g?.let { v -> "У: ${v}г" },
+                    it.dish.caloriesPer100g?.let { v -> "ккал: $v" }
+                ).joinToString(" • ")
+                if (nutrition.isNotBlank()) Text(nutrition)
+            }
         }
     }
 }

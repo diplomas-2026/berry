@@ -4,12 +4,14 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.company.product.mobile.presentation.AppState
 import kotlinx.coroutines.launch
@@ -28,44 +30,54 @@ fun ProfileScreen(appState: AppState) {
     ) { uri -> selectedUri = uri }
 
     ScreenContainer("Профиль") {
-        if (!avatarUrl.isNullOrBlank()) {
-            AsyncImage(model = avatarUrl, contentDescription = "Аватар", modifier = Modifier.fillMaxWidth())
-        } else {
-            Text("Аватар не установлен")
+        SectionCard(title = "Фотография профиля", subtitle = "Можно установить или удалить аватар") {
+            if (!avatarUrl.isNullOrBlank()) {
+                AsyncImage(
+                    model = avatarUrl,
+                    contentDescription = "Аватар",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(220.dp)
+                )
+            } else {
+                Text("Аватар не установлен")
+            }
         }
 
-        Button(onClick = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }, modifier = Modifier.fillMaxWidth()) {
-            Text("Выбрать фото")
-        }
-        Button(
-            onClick = {
-                val uri = selectedUri ?: return@Button
+        SectionCard(title = "Действия") {
+            Button(onClick = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }, modifier = Modifier.fillMaxWidth()) {
+                Text("Выбрать фото")
+            }
+            Button(
+                onClick = {
+                    val uri = selectedUri ?: return@Button
+                    scope.launch {
+                        try {
+                            val updated = repo.uploadAvatar(context, uri)
+                            avatarUrl = updated.avatarUrl
+                            message = "Аватар обновлен"
+                        } catch (e: Exception) {
+                            message = "Ошибка загрузки: ${e.message}"
+                        }
+                    }
+                },
+                enabled = selectedUri != null,
+                modifier = Modifier.fillMaxWidth()
+            ) { Text("Загрузить аватар") }
+            Button(onClick = {
                 scope.launch {
                     try {
-                        val updated = repo.uploadAvatar(context, uri)
+                        val updated = repo.deleteAvatar()
                         avatarUrl = updated.avatarUrl
-                        message = "Аватар обновлен"
+                        message = "Аватар удалён"
                     } catch (e: Exception) {
-                        message = "Ошибка загрузки: ${e.message}"
+                        message = "Ошибка: ${e.message}"
                     }
                 }
-            },
-            enabled = selectedUri != null,
-            modifier = Modifier.fillMaxWidth()
-        ) { Text("Загрузить аватар") }
-        Button(onClick = {
-            scope.launch {
-                try {
-                    val updated = repo.deleteAvatar()
-                    avatarUrl = updated.avatarUrl
-                    message = "Аватар удалён"
-                } catch (e: Exception) {
-                    message = "Ошибка: ${e.message}"
-                }
+            }, modifier = Modifier.fillMaxWidth()) {
+                Text("Удалить аватар")
             }
-        }, modifier = Modifier.fillMaxWidth()) {
-            Text("Удалить аватар")
         }
-        if (message.isNotBlank()) Text(message)
+        if (message.isNotBlank()) SectionCard(title = "Статус") { Text(message) }
     }
 }

@@ -28,6 +28,10 @@ fun ChefMenuScreen(repo: AppRepository) {
     ScreenContainer("Текущее меню") {
         if (loading) CenterLoading()
         if (error != null) Text("Ошибка: $error")
-        menu.forEach { Text("${it.mealSlot}: ${it.dish.name}") }
+        menu.forEach {
+            SectionCard(title = "${it.mealSlot}: ${it.dish.name}", subtitle = it.date) {
+                if (!it.dish.description.isNullOrBlank()) Text(it.dish.description)
+            }
+        }
     }
 }

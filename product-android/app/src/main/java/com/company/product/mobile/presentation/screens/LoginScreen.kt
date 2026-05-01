@@ -21,40 +21,44 @@ fun LoginScreen(appState: AppState, onSuccess: () -> Unit) {
     val scope = rememberCoroutineScope()
 
     ScreenContainer("Вход") {
-        Text("Авторизуйтесь в системе питания", style = MaterialTheme.typography.bodyMedium)
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Пароль") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
-        )
-        if (error != null) Text(error!!, color = MaterialTheme.colorScheme.error)
-        Button(
-            onClick = {
-                scope.launch {
-                    loading = true
-                    error = null
-                    try {
-                        appState.login(email.trim(), password)
-                        onSuccess()
-                    } catch (e: Exception) {
-                        error = e.message ?: "Ошибка входа"
-                    } finally {
-                        loading = false
-                    }
-                }
-            },
-            enabled = !loading,
-            modifier = Modifier.fillMaxWidth()
+        SectionCard(
+            title = "Авторизация",
+            subtitle = "Введите данные учётной записи"
         ) {
-            Text(if (loading) "Входим..." else "Войти")
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Пароль") },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth()
+            )
+            if (error != null) Text(error!!, color = MaterialTheme.colorScheme.error)
+            Button(
+                onClick = {
+                    scope.launch {
+                        loading = true
+                        error = null
+                        try {
+                            appState.login(email.trim(), password)
+                            onSuccess()
+                        } catch (e: Exception) {
+                            error = e.message ?: "Ошибка входа"
+                        } finally {
+                            loading = false
+                        }
+                    }
+                },
+                enabled = !loading,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(if (loading) "Входим..." else "Войти")
+            }
         }
     }
 }
