@@ -26,13 +26,13 @@ fun ChefScanScreen(repo: AppRepository) {
             OutlinedTextField(
                 value = studentId,
                 onValueChange = { studentId = it },
-                label = { Text("studentId из QR") },
+                label = { Text("ID студента из QR") },
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = date,
                 onValueChange = { date = it },
-                label = { Text("date из QR (YYYY-MM-DD)") },
+                label = { Text("Дата из QR (YYYY-MM-DD)") },
                 modifier = Modifier.fillMaxWidth()
             )
             Button(
@@ -59,9 +59,9 @@ fun ChefScanScreen(repo: AppRepository) {
         if (scanResult != null) {
             SectionCard(title = "Студент", subtitle = scanResult!!.student.fullName) {
                 Text("Доступные талоны:")
-                scanResult!!.activeVouchers.forEach { Text("ID ${it.id} • ${it.mealSlot} • ${it.status}") }
+                scanResult!!.activeVouchers.forEach { Text("ID ${it.id} • ${mealSlotLabel(it.mealSlot)} • ${voucherStatusLabel(it.status)}") }
                 Text("Блюда к выдаче:")
-                scanResult!!.menuItems.forEach { Text("${it.mealSlot}: ${it.dish.name}") }
+                scanResult!!.menuItems.forEach { Text("${mealSlotLabel(it.mealSlot)}: ${it.dish.name}") }
             }
         }
 
@@ -77,7 +77,7 @@ fun ChefScanScreen(repo: AppRepository) {
                     scope.launch {
                         try {
                             val result = repo.chefRedeem(voucherIdForRedeem.toLong())
-                            message = "Погашено: #${result.id} (${result.mealSlot})"
+                            message = "Погашено: #${result.id} (${mealSlotLabel(result.mealSlot)})"
                         } catch (e: Exception) {
                             message = "Ошибка погашения: ${e.message}"
                         }

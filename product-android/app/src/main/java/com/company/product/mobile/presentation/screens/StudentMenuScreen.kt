@@ -2,6 +2,7 @@ package com.company.product.mobile.presentation.screens
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import com.company.product.mobile.data.remote.MenuItemDto
 import com.company.product.mobile.data.repository.AppRepository
 import kotlinx.coroutines.launch
@@ -29,7 +30,13 @@ fun StudentMenuScreen(repo: AppRepository) {
         if (loading) CenterLoading()
         if (error != null) ErrorCard(error!!)
         items.forEach {
-            SectionCard(title = "${it.mealSlot}: ${it.dish.name}", subtitle = it.date) {
+            SectionCard(title = "${mealSlotLabel(it.mealSlot)}: ${it.dish.name}", subtitle = "Дата: ${it.date}") {
+                MediaFrame(
+                    url = it.dish.photoUrl,
+                    placeholderTitle = "Фото блюда отсутствует",
+                    placeholderSubtitle = "Заглушка для блюда",
+                    aspectRatio = 16f / 9f
+                )
                 if (!it.dish.description.isNullOrBlank()) Text(it.dish.description)
                 val nutrition = listOfNotNull(
                     it.dish.proteinsPer100g?.let { v -> "Б: ${v}г" },

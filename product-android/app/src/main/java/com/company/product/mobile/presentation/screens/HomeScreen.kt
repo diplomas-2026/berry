@@ -15,7 +15,7 @@ fun HomeScreen(session: SessionUi?, onOpen: (String) -> Unit, onLogout: () -> Un
             title = session?.fullName ?: "Пользователь",
             subtitle = session?.email ?: "-"
         ) {
-            StatusPill("Роль: ${session?.role ?: "-"}")
+            StatusPill("Роль: ${roleLabel(session?.role)}")
         }
 
         SectionCard(title = "Разделы") {

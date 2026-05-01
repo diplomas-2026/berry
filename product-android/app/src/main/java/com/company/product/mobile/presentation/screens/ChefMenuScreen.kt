@@ -29,7 +29,13 @@ fun ChefMenuScreen(repo: AppRepository) {
         if (loading) CenterLoading()
         if (error != null) ErrorCard(error!!)
         menu.forEach {
-            SectionCard(title = "${it.mealSlot}: ${it.dish.name}", subtitle = it.date) {
+            SectionCard(title = "${mealSlotLabel(it.mealSlot)}: ${it.dish.name}", subtitle = "Дата: ${it.date}") {
+                MediaFrame(
+                    url = it.dish.photoUrl,
+                    placeholderTitle = "Фото блюда отсутствует",
+                    placeholderSubtitle = "Повар может загрузить фото позже",
+                    aspectRatio = 16f / 9f
+                )
                 if (!it.dish.description.isNullOrBlank()) Text(it.dish.description)
             }
         }

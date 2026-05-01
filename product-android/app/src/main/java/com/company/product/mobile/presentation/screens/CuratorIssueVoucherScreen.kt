@@ -34,9 +34,9 @@ fun CuratorIssueVoucherScreen(repo: AppRepository) {
                 label = { Text("Дата (YYYY-MM-DD)") },
                 modifier = Modifier.fillMaxWidth()
             )
-            Row { Checkbox(checked = breakfast, onCheckedChange = { breakfast = it }); Text("BREAKFAST") }
-            Row { Checkbox(checked = lunch, onCheckedChange = { lunch = it }); Text("LUNCH") }
-            Row { Checkbox(checked = dinner, onCheckedChange = { dinner = it }); Text("DINNER") }
+            Row { Checkbox(checked = breakfast, onCheckedChange = { breakfast = it }); Text("Завтрак") }
+            Row { Checkbox(checked = lunch, onCheckedChange = { lunch = it }); Text("Обед") }
+            Row { Checkbox(checked = dinner, onCheckedChange = { dinner = it }); Text("Ужин") }
             Button(
                 onClick = {
                     scope.launch {

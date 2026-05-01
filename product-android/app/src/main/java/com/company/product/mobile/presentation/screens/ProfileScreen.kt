@@ -4,15 +4,12 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.company.product.mobile.presentation.AppState
 import kotlinx.coroutines.launch
 
@@ -31,17 +28,12 @@ fun ProfileScreen(appState: AppState) {
 
     ScreenContainer("Профиль") {
         SectionCard(title = "Фотография профиля", subtitle = "Можно установить или удалить аватар") {
-            if (!avatarUrl.isNullOrBlank()) {
-                AsyncImage(
-                    model = avatarUrl,
-                    contentDescription = "Аватар",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(220.dp)
-                )
-            } else {
-                Text("Аватар не установлен")
-            }
+            MediaFrame(
+                url = avatarUrl,
+                placeholderTitle = "Аватар не установлен",
+                placeholderSubtitle = "Можно выбрать фото из галереи",
+                aspectRatio = 1f
+            )
         }
 
         SectionCard(title = "Действия") {

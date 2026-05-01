@@ -30,8 +30,8 @@ fun StudentVouchersScreen(repo: AppRepository) {
         if (error != null) ErrorCard(error!!)
         vouchers.forEach {
             SectionCard(title = "Талон #${it.id}", subtitle = it.issueDate) {
-                Text("Приём пищи: ${it.mealSlot}")
-                StatusPill(it.status)
+                Text("Приём пищи: ${mealSlotLabel(it.mealSlot)}")
+                StatusPill(voucherStatusLabel(it.status))
             }
         }
     }
