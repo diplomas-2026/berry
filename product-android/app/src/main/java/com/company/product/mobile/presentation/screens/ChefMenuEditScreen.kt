@@ -62,7 +62,7 @@ fun ChefMenuEditScreen(
 
     ChefMenuItemEditor(
         title = "Изменить блюдо",
-        subtitle = targetItem?.dish?.name ?: "Редактирование выбранного пункта меню",
+        subtitle = targetItem?.dish?.name ?: "Измените дату меню этого блюда",
         selectedDate = selectedDate,
         dateOptions = menuDates,
         onDateSelected = { selectedDate = it },

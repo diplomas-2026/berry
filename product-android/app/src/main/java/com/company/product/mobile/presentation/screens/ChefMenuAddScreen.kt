@@ -50,7 +50,7 @@ fun ChefMenuAddScreen(
 
     ChefMenuItemEditor(
         title = "Добавить блюдо",
-        subtitle = "Создание пункта меню на выбранный день",
+        subtitle = "Выберите дату меню этого блюда",
         selectedDate = selectedDate,
         dateOptions = menuDates,
         onDateSelected = { selectedDate = it },

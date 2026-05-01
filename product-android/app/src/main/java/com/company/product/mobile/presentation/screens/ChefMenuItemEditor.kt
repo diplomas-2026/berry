@@ -98,7 +98,7 @@ fun ChefMenuItemEditor(
                         ).show()
                     }
                 ) {
-                    Text("Выбрать другой день")
+                    Text("Выбрать дату меню блюда")
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
