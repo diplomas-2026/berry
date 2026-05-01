@@ -59,7 +59,7 @@ fun ChefScanScreen(repo: AppRepository) {
         if (scanResult != null) {
             SectionCard(title = "Студент", subtitle = scanResult!!.student.fullName) {
                 Text("Доступные талоны:")
-                scanResult!!.activeVouchers.forEach { Text("ID ${it.id} • ${mealSlotLabel(it.mealSlot)} • ${voucherStatusLabel(it.status)}") }
+                scanResult!!.activeVouchers.forEach { Text("ID ${it.id} • ${mealSlotLabel(it.mealSlot)} • ${voucherStatusLabel(it.status)} • ${formatDate(it.issueDate)}") }
                 Text("Блюда к выдаче:")
                 scanResult!!.menuItems.forEach { Text("${mealSlotLabel(it.mealSlot)}: ${it.dish.name}") }
             }

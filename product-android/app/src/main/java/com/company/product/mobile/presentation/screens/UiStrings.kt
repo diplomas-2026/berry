@@ -1,5 +1,10 @@
 package com.company.product.mobile.presentation.screens
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.Locale
+
 fun roleLabel(role: String?): String = when (role?.uppercase()) {
     "ADMIN" -> "Администратор"
     "CURATOR" -> "Куратор"
@@ -21,4 +26,14 @@ fun voucherStatusLabel(status: String?): String = when (status?.uppercase()) {
     "EXPIRED" -> "Просрочен"
     "CANCELLED" -> "Отменён"
     else -> status ?: "-"
+}
+
+private val RussianDateFormatter: DateTimeFormatter = DateTimeFormatter
+    .ofLocalizedDate(FormatStyle.LONG)
+    .withLocale(Locale("ru", "RU"))
+
+fun formatDate(date: String?): String {
+    if (date.isNullOrBlank()) return "-"
+    return runCatching { LocalDate.parse(date).format(RussianDateFormatter) }
+        .getOrElse { date }
 }
