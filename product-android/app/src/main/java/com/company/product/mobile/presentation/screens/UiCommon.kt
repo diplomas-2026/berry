@@ -117,7 +117,9 @@ fun SectionCard(
             modifier = Modifier.padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
+            if (title.isNotBlank()) {
+                Text(title, style = MaterialTheme.typography.titleMedium)
+            }
             if (!subtitle.isNullOrBlank()) {
                 Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }

@@ -83,14 +83,23 @@ fun StudentMenuScreen(repo: AppRepository) {
             } else {
                 selectedItems.forEach {
                     SectionCard(
-                        title = "${mealSlotLabel(it.mealSlot)}: ${it.dish.name}",
-                        subtitle = formatDate(it.date)
+                        title = "",
+                        subtitle = null
                     ) {
                         MediaFrame(
                             url = it.dish.photoUrl,
                             placeholderTitle = "Фото блюда отсутствует",
                             placeholderSubtitle = "Заглушка для блюда",
                             aspectRatio = 16f / 9f
+                        )
+                        Text(
+                            text = "${mealSlotLabel(it.mealSlot)}: ${it.dish.name}",
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Text(
+                            text = formatDate(it.date),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         if (!it.dish.description.isNullOrBlank()) {
                             Text(it.dish.description)
