@@ -37,6 +37,7 @@ fun ScreenContainer(
     showTopBar: Boolean = true,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val colors = MaterialTheme.colorScheme
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
@@ -56,19 +57,19 @@ fun ScreenContainer(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            MaterialTheme.colorScheme.background,
-                            MaterialTheme.colorScheme.background.copy(alpha = 0.98f),
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f)
+                            colors.background,
+                            colors.background.copy(alpha = 0.98f),
+                            colors.surfaceVariant.copy(alpha = 0.28f)
                         )
                     )
                 )
                 .drawBehind {
                     val stroke = 1.2f
-                    val color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.28f)
+                    val lineColor = colors.outlineVariant.copy(alpha = 0.28f)
                     val step = 92f
                     var y = 0f
                     while (y < size.height + step) {
-                        drawLine(color = color, start = Offset(0f, y), end = Offset(size.width, y), strokeWidth = stroke)
+                        drawLine(color = lineColor, start = Offset(0f, y), end = Offset(size.width, y), strokeWidth = stroke)
                         y += step
                     }
                 }
