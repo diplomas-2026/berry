@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.weight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Dining
@@ -53,18 +52,10 @@ fun HomeScreen(session: SessionUi?, onOpen: (String) -> Unit, onLogout: () -> Un
                     HomeTile("Пользователи", Icons.Default.People) { onOpen("admin_users") }
                 )
                 else -> emptyList()
-            }
+            )
 
-            TileGrid(entries)
-        }
-
-        SectionCard(
-            title = "Аккаунт",
-            subtitle = "Профиль и выход",
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.16f)
-        ) {
             TileGrid(
-                listOf(
+                entries + listOf(
                     HomeTile("Профиль", Icons.Default.Person) { onOpen("profile") },
                     HomeTile("Выйти", Icons.Default.Logout) { onLogout() }
                 )
