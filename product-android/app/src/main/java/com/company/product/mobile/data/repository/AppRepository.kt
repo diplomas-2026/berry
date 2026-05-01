@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.time.LocalDate
 
@@ -33,6 +34,50 @@ class AppRepository(
         api.issueVoucher(IssueVoucherRequest(studentId, date, slots))
 
     suspend fun chefDishes() = api.chefDishes()
+    suspend fun chefCreateDish(
+        context: Context,
+        name: String,
+        description: String?,
+        proteinsPer100g: String?,
+        fatsPer100g: String?,
+        carbsPer100g: String?,
+        caloriesPer100g: String?,
+        photoUri: Uri?
+    ): DishDto = withContext(Dispatchers.IO) {
+        api.chefCreateDish(
+            name = textPart(name)!!,
+            description = textPart(description),
+            proteinsPer100g = numericPart(proteinsPer100g),
+            fatsPer100g = numericPart(fatsPer100g),
+            carbsPer100g = numericPart(carbsPer100g),
+            caloriesPer100g = numericPart(caloriesPer100g),
+            file = photoPart(context, photoUri)
+        )
+    }
+
+    suspend fun chefUpdateDish(
+        context: Context,
+        id: Long,
+        name: String,
+        description: String?,
+        proteinsPer100g: String?,
+        fatsPer100g: String?,
+        carbsPer100g: String?,
+        caloriesPer100g: String?,
+        photoUri: Uri?
+    ): DishDto = withContext(Dispatchers.IO) {
+        api.chefUpdateDish(
+            id = id,
+            name = textPart(name)!!,
+            description = textPart(description),
+            proteinsPer100g = numericPart(proteinsPer100g),
+            fatsPer100g = numericPart(fatsPer100g),
+            carbsPer100g = numericPart(carbsPer100g),
+            caloriesPer100g = numericPart(caloriesPer100g),
+            file = photoPart(context, photoUri)
+        )
+    }
+
     suspend fun chefMenuDates() = api.chefMenuDates()
     suspend fun chefMenu(date: String) = api.chefMenu(date)
     suspend fun chefAddMenuItem(date: String, mealSlot: String, dishId: Long) =
@@ -62,5 +107,25 @@ class AppRepository(
         val body = bytes.toRequestBody("image/*".toMediaTypeOrNull())
         val part = MultipartBody.Part.createFormData("file", "avatar.jpg", body)
         api.uploadAvatar(part)
+    }
+
+    private fun textPart(value: String?): RequestBody? {
+        val normalized = value?.trim().orEmpty()
+        if (normalized.isBlank()) return null
+        return normalized.toRequestBody("text/plain".toMediaTypeOrNull())
+    }
+
+    private fun numericPart(value: String?): RequestBody? {
+        val normalized = value?.trim().orEmpty().replace(',', '.')
+        if (normalized.isBlank()) return null
+        return normalized.toRequestBody("text/plain".toMediaTypeOrNull())
+    }
+
+    private fun photoPart(context: Context, uri: Uri?): MultipartBody.Part? {
+        if (uri == null) return null
+        val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+            ?: error("Не удалось прочитать файл")
+        val body = bytes.toRequestBody("image/*".toMediaTypeOrNull())
+        return MultipartBody.Part.createFormData("file", "dish.jpg", body)
     }
 }

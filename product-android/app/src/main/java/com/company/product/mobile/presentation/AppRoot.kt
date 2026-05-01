@@ -66,13 +66,28 @@ fun AppRoot() {
                     route = "chef_menu_add/{date}",
                     arguments = listOf(navArgument("date") { type = NavType.StringType })
                 ) { backStackEntry ->
+                    val date = backStackEntry.arguments?.getString("date") ?: LocalDate.now().toString()
                     ChefMenuAddScreen(
                         repo = appState.repository(),
-                        initialDate = backStackEntry.arguments?.getString("date") ?: LocalDate.now().toString(),
+                        initialDate = date,
+                        onCreateDish = { nav.navigate("chef_dish_create/$date") },
                         onDone = {
                             nav.navigate("chef_menu") {
                                 popUpTo("chef_menu") { inclusive = true }
                             }
+                        }
+                    )
+                }
+                composable(
+                    route = "chef_dish_create/{returnDate}",
+                    arguments = listOf(navArgument("returnDate") { type = NavType.StringType })
+                ) { backStackEntry ->
+                    val returnDate = backStackEntry.arguments?.getString("returnDate") ?: LocalDate.now().toString()
+                    ChefDishCreateScreen(
+                        repo = appState.repository(),
+                        onDone = {
+                            nav.popBackStack("chef_menu_add/$returnDate", inclusive = true)
+                            nav.navigate("chef_menu_add/$returnDate")
                         }
                     )
                 }

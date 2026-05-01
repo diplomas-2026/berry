@@ -54,6 +54,7 @@ fun ChefMenuItemEditor(
     message: String?,
     submitLabel: String,
     onSubmit: () -> Unit,
+    onCreateDish: (() -> Unit)? = null,
     onDelete: (() -> Unit)? = null,
     onCancelEdit: (() -> Unit)? = null
 ) {
@@ -142,6 +143,17 @@ fun ChefMenuItemEditor(
                                 }
                             )
                         }
+                    }
+                }
+
+                if (onCreateDish != null) {
+                    TextButton(
+                        onClick = onCreateDish,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(imageVector = Icons.Default.Add, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Создать новое блюдо")
                     }
                 }
 

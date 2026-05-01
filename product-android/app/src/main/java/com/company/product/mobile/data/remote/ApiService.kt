@@ -1,6 +1,7 @@
 package com.company.product.mobile.data.remote
 
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -34,6 +35,31 @@ interface ApiService {
 
     @GET("api/chef/dishes")
     suspend fun chefDishes(): List<DishDto>
+
+    @Multipart
+    @POST("api/chef/dishes")
+    suspend fun chefCreateDish(
+        @Part("name") name: RequestBody,
+        @Part("description") description: RequestBody?,
+        @Part("proteinsPer100g") proteinsPer100g: RequestBody?,
+        @Part("fatsPer100g") fatsPer100g: RequestBody?,
+        @Part("carbsPer100g") carbsPer100g: RequestBody?,
+        @Part("caloriesPer100g") caloriesPer100g: RequestBody?,
+        @Part file: MultipartBody.Part?
+    ): DishDto
+
+    @Multipart
+    @PATCH("api/chef/dishes/{id}")
+    suspend fun chefUpdateDish(
+        @Path("id") id: Long,
+        @Part("name") name: RequestBody,
+        @Part("description") description: RequestBody?,
+        @Part("proteinsPer100g") proteinsPer100g: RequestBody?,
+        @Part("fatsPer100g") fatsPer100g: RequestBody?,
+        @Part("carbsPer100g") carbsPer100g: RequestBody?,
+        @Part("caloriesPer100g") caloriesPer100g: RequestBody?,
+        @Part file: MultipartBody.Part?
+    ): DishDto
 
     @GET("api/chef/menu")
     suspend fun chefMenu(@retrofit2.http.Query("date") date: String): List<MenuItemDto>

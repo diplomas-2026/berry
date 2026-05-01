@@ -31,12 +31,13 @@ fun MediaFrame(
     url: String?,
     placeholderTitle: String,
     placeholderSubtitle: String? = null,
+    model: Any? = null,
     modifier: Modifier = Modifier,
     aspectRatio: Float = 1f,
     rounded: Dp = 18.dp
 ) {
     val shape = RoundedCornerShape(rounded)
-    val resolvedUrl = normalizeMediaUrl(url)
+    val resolvedUrl = model ?: normalizeMediaUrl(url)
     Surface(
         shape = shape,
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.28f),
@@ -45,7 +46,7 @@ fun MediaFrame(
             .aspectRatio(aspectRatio)
             .clip(shape)
     ) {
-        if (resolvedUrl.isNullOrBlank()) {
+        if (resolvedUrl == null || (resolvedUrl is String && resolvedUrl.isBlank())) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()

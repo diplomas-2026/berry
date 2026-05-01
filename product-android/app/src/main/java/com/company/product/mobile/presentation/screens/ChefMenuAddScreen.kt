@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 fun ChefMenuAddScreen(
     repo: AppRepository,
     initialDate: String,
+    onCreateDish: () -> Unit,
     onDone: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -82,6 +83,7 @@ fun ChefMenuAddScreen(
                     }
                 }
             }
-        }
+        },
+        onCreateDish = onCreateDish
     )
 }

@@ -13,14 +13,17 @@ import com.company.product.api.service.StorageService;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
+@Validated
 @RequestMapping("/api/chef")
 @PreAuthorize("hasRole('CHEF')")
 public class ChefController {
@@ -42,7 +45,7 @@ public class ChefController {
         this.storageService = storageService;
     }
 
-    @PostMapping("/dishes")
+    @PostMapping(value = "/dishes", consumes = MediaType.APPLICATION_JSON_VALUE)
     public Object createDish(@Valid @RequestBody RequestDtos.CreateDishRequest request) {
         Dish dish = new Dish();
         dish.setName(request.name());
@@ -51,12 +54,59 @@ public class ChefController {
         return mapper.toDishDto(dishRepository.save(dish));
     }
 
+    @PostMapping(value = "/dishes", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Object createDishMultipart(
+            @RequestParam @jakarta.validation.constraints.NotBlank String name,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) BigDecimal proteinsPer100g,
+            @RequestParam(required = false) BigDecimal fatsPer100g,
+            @RequestParam(required = false) BigDecimal carbsPer100g,
+            @RequestParam(required = false) BigDecimal caloriesPer100g,
+            @RequestPart(required = false) MultipartFile file
+    ) {
+        Dish dish = new Dish();
+        return mapper.toDishDto(saveDish(
+                dish,
+                name,
+                description,
+                proteinsPer100g,
+                fatsPer100g,
+                carbsPer100g,
+                caloriesPer100g,
+                file
+        ));
+    }
+
     @GetMapping("/dishes")
     public List<?> dishes() {
         return dishRepository.findAll().stream()
                 .sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName()))
                 .map(mapper::toDishDto)
                 .toList();
+    }
+
+    @PatchMapping(value = "/dishes/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Object updateDishMultipart(
+            @PathVariable Long id,
+            @RequestParam @jakarta.validation.constraints.NotBlank String name,
+            @RequestParam(required = false) String description,
+            @RequestParam(required = false) BigDecimal proteinsPer100g,
+            @RequestParam(required = false) BigDecimal fatsPer100g,
+            @RequestParam(required = false) BigDecimal carbsPer100g,
+            @RequestParam(required = false) BigDecimal caloriesPer100g,
+            @RequestPart(required = false) MultipartFile file
+    ) {
+        Dish dish = dishRepository.findById(id).orElseThrow();
+        return mapper.toDishDto(saveDish(
+                dish,
+                name,
+                description,
+                proteinsPer100g,
+                fatsPer100g,
+                carbsPer100g,
+                caloriesPer100g,
+                file
+        ));
     }
 
     @PostMapping(value = "/dishes/{id}/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -138,5 +188,30 @@ public class ChefController {
         menuItem.setMealSlot(mealSlot);
         menuItem.setDish(dish);
         return mapper.toMenuItemDto(menuItemRepository.save(menuItem));
+    }
+
+    private Dish saveDish(
+            Dish dish,
+            String name,
+            String description,
+            BigDecimal proteinsPer100g,
+            BigDecimal fatsPer100g,
+            BigDecimal carbsPer100g,
+            BigDecimal caloriesPer100g,
+            MultipartFile file
+    ) {
+        dish.setName(name);
+        dish.setDescription(description);
+        dish.setProteinsPer100g(proteinsPer100g);
+        dish.setFatsPer100g(fatsPer100g);
+        dish.setCarbsPer100g(carbsPer100g);
+        dish.setCaloriesPer100g(caloriesPer100g);
+        if (file != null && !file.isEmpty()) {
+            dish.setPhotoPath(storageService.store(file, "dishes"));
+        }
+        if (dish.getCreatedByChef() == null) {
+            dish.setCreatedByChef(currentUserService.requireUser());
+        }
+        return dishRepository.save(dish);
     }
 }
