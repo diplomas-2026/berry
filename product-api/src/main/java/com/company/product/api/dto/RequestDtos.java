@@ -18,5 +18,6 @@ public class RequestDtos {
     public record IssueVoucherRequest(@NotNull Long studentId, @NotNull LocalDate date, @NotEmpty List<MealSlot> slots) {}
     public record CreateDishRequest(@NotBlank String name, String description) {}
     public record AddMenuItemRequest(@NotNull LocalDate date, @NotNull MealSlot mealSlot, @NotNull Long dishId) {}
+    public record UpdateMenuItemRequest(@NotNull LocalDate date, @NotNull MealSlot mealSlot, @NotNull Long dishId) {}
     public record RedeemRequest(@NotNull Long voucherId) {}
 }

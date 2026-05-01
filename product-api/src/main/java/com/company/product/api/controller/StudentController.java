@@ -38,7 +38,7 @@ public class StudentController {
     @GetMapping("/menu/today")
     public List<?> todayMenu() {
         LocalDate today = LocalDate.now();
-        return menuItemRepository.findByMenuDate(today).stream().map(mapper::toMenuItemDto).toList();
+        return menuItemRepository.findByMenuDateOrderByMealSlotAsc(today).stream().map(mapper::toMenuItemDto).toList();
     }
 
     @GetMapping("/qr")

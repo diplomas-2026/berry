@@ -32,7 +32,14 @@ class AppRepository(
     suspend fun issueVouchers(studentId: Long, date: String, slots: List<String>) =
         api.issueVoucher(IssueVoucherRequest(studentId, date, slots))
 
-    suspend fun chefMenu() = api.chefMenuCurrent()
+    suspend fun chefDishes() = api.chefDishes()
+    suspend fun chefMenuDates() = api.chefMenuDates()
+    suspend fun chefMenu(date: String) = api.chefMenu(date)
+    suspend fun chefAddMenuItem(date: String, mealSlot: String, dishId: Long) =
+        api.chefAddMenuItem(AddMenuItemRequest(date, mealSlot, dishId))
+    suspend fun chefUpdateMenuItem(id: Long, date: String, mealSlot: String, dishId: Long) =
+        api.chefUpdateMenuItem(id, UpdateMenuItemRequest(date, mealSlot, dishId))
+    suspend fun chefDeleteMenuItem(id: Long) = api.chefDeleteMenuItem(id)
     suspend fun chefScan(studentId: Long, date: String = LocalDate.now().toString()) =
         api.chefScan(QrPayload(studentId, date))
     suspend fun chefRedeem(voucherId: Long) = api.chefRedeem(RedeemRequest(voucherId))

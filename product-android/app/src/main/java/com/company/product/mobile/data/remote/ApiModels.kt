@@ -68,3 +68,15 @@ data class CreateUserRequest(
     val fullName: String,
     val role: String
 )
+
+data class AddMenuItemRequest(
+    val date: String,
+    val mealSlot: String,
+    val dishId: Long
+)
+
+data class UpdateMenuItemRequest(
+    val date: String,
+    val mealSlot: String,
+    val dishId: Long
+)

@@ -32,8 +32,23 @@ interface ApiService {
     @POST("api/curator/vouchers/issue")
     suspend fun issueVoucher(@Body body: IssueVoucherRequest): List<VoucherDto>
 
-    @GET("api/chef/menu/current")
-    suspend fun chefMenuCurrent(): List<MenuItemDto>
+    @GET("api/chef/dishes")
+    suspend fun chefDishes(): List<DishDto>
+
+    @GET("api/chef/menu")
+    suspend fun chefMenu(@retrofit2.http.Query("date") date: String): List<MenuItemDto>
+
+    @GET("api/chef/menu/dates")
+    suspend fun chefMenuDates(): List<String>
+
+    @POST("api/chef/menu/items")
+    suspend fun chefAddMenuItem(@Body body: AddMenuItemRequest): MenuItemDto
+
+    @PATCH("api/chef/menu/items/{id}")
+    suspend fun chefUpdateMenuItem(@Path("id") id: Long, @Body body: UpdateMenuItemRequest): MenuItemDto
+
+    @DELETE("api/chef/menu/items/{id}")
+    suspend fun chefDeleteMenuItem(@Path("id") id: Long)
 
     @POST("api/chef/scan")
     suspend fun chefScan(@Body body: QrPayload): ScanResultDto

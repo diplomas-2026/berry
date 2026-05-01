@@ -51,6 +51,14 @@ public class ChefController {
         return mapper.toDishDto(dishRepository.save(dish));
     }
 
+    @GetMapping("/dishes")
+    public List<?> dishes() {
+        return dishRepository.findAll().stream()
+                .sorted((a, b) -> a.getName().compareToIgnoreCase(b.getName()))
+                .map(mapper::toDishDto)
+                .toList();
+    }
+
     @PostMapping(value = "/dishes/{id}/photo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Object uploadDishPhoto(@PathVariable Long id, @RequestPart("file") MultipartFile file) {
         Dish dish = dishRepository.findById(id).orElseThrow();
@@ -67,24 +75,41 @@ public class ChefController {
 
     @PostMapping("/menu/items")
     public Object addMenuItem(@Valid @RequestBody RequestDtos.AddMenuItemRequest request) {
-        Dish dish = dishRepository.findById(request.dishId()).orElseThrow();
-        MenuItem menuItem = new MenuItem();
-        menuItem.setMenuDate(request.date());
-        menuItem.setMealSlot(request.mealSlot());
-        menuItem.setDish(dish);
-        return mapper.toMenuItemDto(menuItemRepository.save(menuItem));
+        return saveMenuItem(new MenuItem(), request.date(), request.mealSlot(), request.dishId());
     }
 
     @GetMapping("/menu/current")
     public List<?> menuCurrent() {
-        return menuItemRepository.findByMenuDate(LocalDate.now()).stream().map(mapper::toMenuItemDto).toList();
+        return menu(LocalDate.now());
+    }
+
+    @GetMapping("/menu")
+    public List<?> menu(@RequestParam(required = false) LocalDate date) {
+        LocalDate menuDate = date == null ? LocalDate.now() : date;
+        return menuItemRepository.findByMenuDateOrderByMealSlotAsc(menuDate).stream().map(mapper::toMenuItemDto).toList();
+    }
+
+    @GetMapping("/menu/dates")
+    public List<LocalDate> menuDates() {
+        return menuItemRepository.findDistinctMenuDates();
+    }
+
+    @PatchMapping("/menu/items/{id}")
+    public Object updateMenuItem(@PathVariable Long id, @Valid @RequestBody RequestDtos.UpdateMenuItemRequest request) {
+        MenuItem menuItem = menuItemRepository.findById(id).orElseThrow();
+        return saveMenuItem(menuItem, request.date(), request.mealSlot(), request.dishId());
+    }
+
+    @DeleteMapping("/menu/items/{id}")
+    public void deleteMenuItem(@PathVariable Long id) {
+        menuItemRepository.deleteById(id);
     }
 
     @PostMapping("/scan")
     public CommonDtos.ScanResultDto scan(@Valid @RequestBody CommonDtos.QrPayload payload) {
         AppUser student = userRepository.findById(payload.studentId()).orElseThrow();
         List<MealVoucher> vouchers = voucherRepository.findByStudentIdAndIssueDateAndStatus(student.getId(), payload.date(), VoucherStatus.ISSUED);
-        List<MenuItem> menu = menuItemRepository.findByMenuDate(payload.date());
+        List<MenuItem> menu = menuItemRepository.findByMenuDateOrderByMealSlotAsc(payload.date());
         List<MenuItem> allowedMenu = menu.stream().filter(mi ->
                 vouchers.stream().anyMatch(v -> v.getMealSlot() == mi.getMealSlot())
         ).toList();
@@ -105,5 +130,13 @@ public class ChefController {
         voucher.setRedeemedByChef(currentUserService.requireUser());
         voucher.setRedeemedAt(LocalDateTime.now());
         return mapper.toVoucherDto(voucherRepository.save(voucher));
+    }
+
+    private Object saveMenuItem(MenuItem menuItem, LocalDate date, MealSlot mealSlot, Long dishId) {
+        Dish dish = dishRepository.findById(dishId).orElseThrow();
+        menuItem.setMenuDate(date);
+        menuItem.setMealSlot(mealSlot);
+        menuItem.setDish(dish);
+        return mapper.toMenuItemDto(menuItemRepository.save(menuItem));
     }
 }
