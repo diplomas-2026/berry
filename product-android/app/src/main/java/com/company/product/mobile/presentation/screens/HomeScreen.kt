@@ -80,8 +80,7 @@ fun HomeScreen(session: SessionUi?, onOpen: (String) -> Unit, onLogout: () -> Un
                     HomeTile(
                         "Студенты группы",
                         Icons.Default.People
-                    ) { onOpen("curator_students") },
-                    HomeTile("Выдача талонов", Icons.Default.Badge) { onOpen("curator_issue") }
+                    ) { onOpen("curator_students") }
                 )
 
                 "CHEF" -> listOf(

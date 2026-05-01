@@ -67,8 +67,22 @@ fun AppRoot() {
                 }
                 composable("student_vouchers") { StudentVouchersScreen(appState.repository()) }
                 composable("student_qr") { StudentQrScreen(appState.repository()) }
-                composable("curator_students") { CuratorStudentsScreen(appState.repository()) }
-                composable("curator_issue") { CuratorIssueVoucherScreen(appState.repository()) }
+                composable("curator_students") {
+                    CuratorStudentsScreen(
+                        repo = appState.repository(),
+                        onIssueVoucher = { studentId -> nav.navigate("curator_issue/$studentId") }
+                    )
+                }
+                composable(
+                    route = "curator_issue/{studentId}",
+                    arguments = listOf(navArgument("studentId") { type = NavType.LongType })
+                ) { backStackEntry ->
+                    CuratorIssueVoucherScreen(
+                        repo = appState.repository(),
+                        studentId = backStackEntry.arguments?.getLong("studentId") ?: 0L,
+                        onDone = { nav.popBackStack() }
+                    )
+                }
                 composable("chef_menu") {
                     ChefMenuScreen(
                         repo = appState.repository(),

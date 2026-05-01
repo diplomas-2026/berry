@@ -30,6 +30,8 @@ class AppRepository(
     suspend fun studentQr() = api.studentQr()
 
     suspend fun curatorStudents() = api.curatorStudents()
+    suspend fun curatorGroups() = api.curatorGroups()
+    suspend fun curatorGroupStudents(groupId: Long) = api.curatorGroupStudents(groupId)
     suspend fun issueVouchers(studentId: Long, date: String, slots: List<String>) =
         api.issueVoucher(IssueVoucherRequest(studentId, date, slots))
 

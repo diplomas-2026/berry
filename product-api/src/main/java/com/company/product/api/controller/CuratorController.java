@@ -5,6 +5,7 @@ import com.company.product.api.entity.*;
 import com.company.product.api.repository.AppUserRepository;
 import com.company.product.api.repository.GroupMemberRepository;
 import com.company.product.api.repository.MealVoucherRepository;
+import com.company.product.api.repository.StudentGroupRepository;
 import com.company.product.api.service.CurrentUserService;
 import com.company.product.api.service.DtoMapper;
 import jakarta.validation.Valid;
@@ -18,17 +19,37 @@ import java.util.List;
 @PreAuthorize("hasRole('CURATOR')")
 public class CuratorController {
     private final CurrentUserService currentUserService;
+    private final StudentGroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final AppUserRepository userRepository;
     private final MealVoucherRepository voucherRepository;
     private final DtoMapper mapper;
 
-    public CuratorController(CurrentUserService currentUserService, GroupMemberRepository groupMemberRepository, AppUserRepository userRepository, MealVoucherRepository voucherRepository, DtoMapper mapper) {
+    public CuratorController(CurrentUserService currentUserService, StudentGroupRepository groupRepository, GroupMemberRepository groupMemberRepository, AppUserRepository userRepository, MealVoucherRepository voucherRepository, DtoMapper mapper) {
         this.currentUserService = currentUserService;
+        this.groupRepository = groupRepository;
         this.groupMemberRepository = groupMemberRepository;
         this.userRepository = userRepository;
         this.voucherRepository = voucherRepository;
         this.mapper = mapper;
+    }
+
+    @GetMapping("/groups")
+    public List<?> groups() {
+        Long curatorId = currentUserService.requireUser().getId();
+        return groupRepository.findByCuratorId(curatorId).stream().map(mapper::toGroupDto).toList();
+    }
+
+    @GetMapping("/groups/{groupId}/students")
+    public List<?> groupStudents(@PathVariable Long groupId) {
+        Long curatorId = currentUserService.requireUser().getId();
+        if (groupRepository.findByCuratorId(curatorId).stream().noneMatch(group -> group.getId().equals(groupId))) {
+            throw new IllegalArgumentException("Группа не относится к куратору");
+        }
+        return groupMemberRepository.findByGroupId(groupId).stream()
+                .map(GroupMember::getStudent)
+                .map(mapper::toUserDto)
+                .toList();
     }
 
     @GetMapping("/students")
