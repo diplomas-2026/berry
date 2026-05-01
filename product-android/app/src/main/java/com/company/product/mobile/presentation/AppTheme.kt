@@ -3,7 +3,10 @@ package com.company.product.mobile.presentation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.Typography
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
 private val DarkColors = darkColorScheme(
@@ -42,6 +45,13 @@ fun BerryTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = DarkColors,
         typography = AppTypography,
-        content = content
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = DarkColors.background,
+            contentColor = DarkColors.onBackground
+        ) {
+            content()
+        }
     )
 }
