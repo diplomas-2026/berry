@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
@@ -19,11 +21,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -48,6 +52,8 @@ fun ChefMenuScreen(
     var query by remember { mutableStateOf("") }
     var mealFilter by remember { mutableStateOf("ALL") }
     var sortMode by remember { mutableStateOf("slot") }
+    var deleteTarget by remember { mutableStateOf<MenuItemDto?>(null) }
+    val scope = rememberCoroutineScope()
 
     suspend fun loadDates() {
         menuDates = repo.chefMenuDates()
@@ -226,18 +232,7 @@ fun ChefMenuScreen(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        if (!item.dish.description.isNullOrBlank()) {
-                            Text(item.dish.description)
-                        }
-                        val nutrition = listOfNotNull(
-                            item.dish.proteinsPer100g?.let { v -> "Б: ${v}г" },
-                            item.dish.fatsPer100g?.let { v -> "Ж: ${v}г" },
-                            item.dish.carbsPer100g?.let { v -> "У: ${v}г" },
-                            item.dish.caloriesPer100g?.let { v -> "ккал: $v" }
-                        ).joinToString(" • ")
-                        if (nutrition.isNotBlank()) {
-                            Text(nutrition, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
+
                         Button(
                             onClick = { onEdit(item.date, item.id) },
                             modifier = Modifier.fillMaxWidth()
@@ -246,9 +241,52 @@ fun ChefMenuScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Изменить")
                         }
+                        TextButton(
+                            onClick = { deleteTarget = item },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(imageVector = Icons.Default.Delete, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Удалить из меню")
+                        }
                     }
                 }
             }
+        }
+
+        if (deleteTarget != null) {
+            AlertDialog(
+                onDismissRequest = { deleteTarget = null },
+                title = { Text("Удалить блюдо из меню?") },
+                text = {
+                    Text(
+                        text = "Это действие уберёт блюдо ${mealSlotLabel(deleteTarget!!.mealSlot)} на ${formatDate(deleteTarget!!.date)}."
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val target = deleteTarget ?: return@TextButton
+                            deleteTarget = null
+                            scope.launch {
+                                try {
+                                    repo.chefDeleteMenuItem(target.id)
+                                    reload()
+                                } catch (e: Exception) {
+                                    error = e.message
+                                }
+                            }
+                        }
+                    ) {
+                        Text("Удалить")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { deleteTarget = null }) {
+                        Text("Отмена")
+                    }
+                }
+            )
         }
     }
 }
