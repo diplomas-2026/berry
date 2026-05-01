@@ -43,11 +43,11 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        AppUser admin = upsertUser("admin1@pgk.local", "Admin PGK", UserRole.ADMIN, "admin123");
-        AppUser curator = upsertUser("curator1@pgk.local", "Куратор 1", UserRole.CURATOR, "curator123");
-        AppUser chef = upsertUser("chef1@pgk.local", "Повар 1", UserRole.CHEF, "chef123");
-        AppUser student1 = upsertUser("student1@pgk.local", "Студент 1", UserRole.STUDENT, "student123");
-        AppUser student2 = upsertUser("student2@pgk.local", "Студент 2", UserRole.STUDENT, "student123");
+        AppUser admin = upsertUser("admin1@pgk.local", "Иванов", "Иван", "Иванович", UserRole.ADMIN, "admin123");
+        AppUser curator = upsertUser("curator1@pgk.local", "Петрова", "Анна", "Сергеевна", UserRole.CURATOR, "curator123");
+        AppUser chef = upsertUser("chef1@pgk.local", "Смирнов", "Олег", "Викторович", UserRole.CHEF, "chef123");
+        AppUser student1 = upsertUser("student1@pgk.local", "Кузнецов", "Максим", "Андреевич", UserRole.STUDENT, "student123");
+        AppUser student2 = upsertUser("student2@pgk.local", "Соколова", "Мария", "Ильинична", UserRole.STUDENT, "student123");
 
         StudentGroup group = groupRepository.findAll().stream().findFirst().orElseGet(() -> {
             StudentGroup g = new StudentGroup();
@@ -99,10 +99,12 @@ public class DataSeeder implements CommandLineRunner {
         writeUsersFile();
     }
 
-    private AppUser upsertUser(String email, String fullName, UserRole role, String rawPassword) {
+    private AppUser upsertUser(String email, String lastName, String firstName, String middleName, UserRole role, String rawPassword) {
         AppUser user = userRepository.findByEmail(email).orElseGet(AppUser::new);
         user.setEmail(email);
-        user.setFullName(fullName);
+        user.setLastName(lastName);
+        user.setFirstName(firstName);
+        user.setMiddleName(middleName);
         user.setRole(role);
         user.setActive(true);
         user.setPasswordHash(passwordEncoder.encode(rawPassword));
@@ -130,11 +132,11 @@ public class DataSeeder implements CommandLineRunner {
 
     private void writeUsersFile() throws IOException {
         List<String> lines = List.of(
-                "email=admin1@pgk.local; password=admin123; role=ADMIN",
-                "email=curator1@pgk.local; password=curator123; role=CURATOR",
-                "email=chef1@pgk.local; password=chef123; role=CHEF",
-                "email=student1@pgk.local; password=student123; role=STUDENT",
-                "email=student2@pgk.local; password=student123; role=STUDENT"
+                "email=admin1@pgk.local; password=admin123; role=ADMIN; lastName=Иванов; firstName=Иван; middleName=Иванович",
+                "email=curator1@pgk.local; password=curator123; role=CURATOR; lastName=Петрова; firstName=Анна; middleName=Сергеевна",
+                "email=chef1@pgk.local; password=chef123; role=CHEF; lastName=Смирнов; firstName=Олег; middleName=Викторович",
+                "email=student1@pgk.local; password=student123; role=STUDENT; lastName=Кузнецов; firstName=Максим; middleName=Андреевич",
+                "email=student2@pgk.local; password=student123; role=STUDENT; lastName=Соколова; firstName=Мария; middleName=Ильинична"
         );
         Path target = Path.of(usersFilePath);
         if (Files.exists(target) && Files.isDirectory(target)) {

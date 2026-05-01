@@ -19,6 +19,15 @@ public class AppUser {
     private String passwordHash;
 
     @Column(nullable = false)
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
+
+    @Column(nullable = false)
+    private String middleName;
+
+    @Column(nullable = false)
     private String fullName;
 
     @Enumerated(EnumType.STRING)
@@ -29,4 +38,10 @@ public class AppUser {
     private boolean active = true;
 
     private String avatarPath;
+
+    @PrePersist
+    @PreUpdate
+    void syncFullName() {
+        this.fullName = String.join(" ", firstName == null ? "" : firstName.trim(), lastName == null ? "" : lastName.trim(), middleName == null ? "" : middleName.trim()).trim().replaceAll("\\s+", " ");
+    }
 }

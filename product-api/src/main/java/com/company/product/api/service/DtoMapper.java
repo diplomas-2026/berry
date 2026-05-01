@@ -7,7 +7,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class DtoMapper {
     public CommonDtos.UserDto toUserDto(AppUser user) {
-        return new CommonDtos.UserDto(user.getId(), user.getEmail(), user.getFullName(), user.getRole(), user.isActive(), user.getAvatarPath());
+        return new CommonDtos.UserDto(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getMiddleName(),
+                user.getFullName(),
+                user.getRole(),
+                user.isActive(),
+                user.getAvatarPath()
+        );
     }
 
     public CommonDtos.DishDto toDishDto(Dish dish) {
@@ -36,6 +46,15 @@ public class DtoMapper {
                 voucher.getMealSlot(),
                 voucher.getStatus(),
                 voucher.getRedeemedAt()
+        );
+    }
+
+    public CommonDtos.GroupDto toGroupDto(StudentGroup group) {
+        return new CommonDtos.GroupDto(
+                group.getId(),
+                group.getName(),
+                group.getCurator() == null ? null : group.getCurator().getId(),
+                group.getCurator() == null ? null : group.getCurator().getFullName()
         );
     }
 }

@@ -5,6 +5,9 @@ data class AuthResponse(
     val token: String,
     val userId: Long,
     val email: String,
+    val firstName: String,
+    val lastName: String,
+    val middleName: String,
     val fullName: String,
     val role: String,
     val avatarUrl: String?
@@ -13,6 +16,9 @@ data class AuthResponse(
 data class UserDto(
     val id: Long,
     val email: String,
+    val firstName: String,
+    val lastName: String,
+    val middleName: String,
     val fullName: String,
     val role: String,
     val active: Boolean,
@@ -65,8 +71,35 @@ data class RedeemRequest(val voucherId: Long)
 data class CreateUserRequest(
     val email: String,
     val password: String,
-    val fullName: String,
+    val firstName: String,
+    val lastName: String,
+    val middleName: String,
     val role: String
+)
+
+data class UpdateUserRequest(
+    val firstName: String,
+    val lastName: String,
+    val middleName: String,
+    val active: Boolean,
+    val role: String
+)
+
+data class GroupDto(
+    val id: Long,
+    val name: String,
+    val curatorId: Long?,
+    val curatorName: String?
+)
+
+data class CreateGroupRequest(
+    val name: String,
+    val curatorId: Long?
+)
+
+data class UpdateGroupRequest(
+    val name: String,
+    val curatorId: Long?
 )
 
 data class AddMenuItemRequest(

@@ -44,7 +44,9 @@ public class AdminController {
         AppUser user = new AppUser();
         user.setEmail(request.email());
         user.setPasswordHash(passwordEncoder.encode(request.password()));
-        user.setFullName(request.fullName());
+        user.setFirstName(request.firstName());
+        user.setLastName(request.lastName());
+        user.setMiddleName(request.middleName());
         user.setRole(request.role());
         user.setActive(true);
         return mapper.toUserDto(userRepository.save(user));
@@ -53,12 +55,21 @@ public class AdminController {
     @PatchMapping("/users/{id}")
     public Object updateUser(@PathVariable Long id, @Valid @RequestBody RequestDtos.UpdateUserRequest request) {
         AppUser user = userRepository.findById(id).orElseThrow();
+        user.setFirstName(request.firstName());
+        user.setLastName(request.lastName());
+        user.setMiddleName(request.middleName());
         user.setActive(request.active());
+        user.setRole(request.role());
         return mapper.toUserDto(userRepository.save(user));
     }
 
+    @GetMapping("/groups")
+    public List<?> groups() {
+        return groupRepository.findAll().stream().map(mapper::toGroupDto).toList();
+    }
+
     @PostMapping("/groups")
-    public StudentGroup createGroup(@Valid @RequestBody RequestDtos.CreateGroupRequest request) {
+    public Object createGroup(@Valid @RequestBody RequestDtos.CreateGroupRequest request) {
         StudentGroup group = new StudentGroup();
         group.setName(request.name());
         if (request.curatorId() != null) {
@@ -68,7 +79,28 @@ public class AdminController {
             }
             group.setCurator(curator);
         }
-        return groupRepository.save(group);
+        return mapper.toGroupDto(groupRepository.save(group));
+    }
+
+    @PatchMapping("/groups/{id}")
+    public Object updateGroup(@PathVariable Long id, @Valid @RequestBody RequestDtos.UpdateGroupRequest request) {
+        StudentGroup group = groupRepository.findById(id).orElseThrow();
+        group.setName(request.name());
+        if (request.curatorId() != null) {
+            AppUser curator = userRepository.findById(request.curatorId()).orElseThrow();
+            if (curator.getRole() != UserRole.CURATOR) {
+                throw new IllegalArgumentException("Пользователь не является куратором");
+            }
+            group.setCurator(curator);
+        } else {
+            group.setCurator(null);
+        }
+        return mapper.toGroupDto(groupRepository.save(group));
+    }
+
+    @DeleteMapping("/groups/{id}")
+    public void deleteGroup(@PathVariable Long id) {
+        groupRepository.deleteById(id);
     }
 
     @PostMapping("/groups/{groupId}/students")

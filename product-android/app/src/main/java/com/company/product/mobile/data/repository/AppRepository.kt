@@ -45,9 +45,14 @@ class AppRepository(
     suspend fun chefRedeem(voucherId: Long) = api.chefRedeem(RedeemRequest(voucherId))
 
     suspend fun adminUsers() = api.adminUsers()
-    suspend fun adminCreateUser(email: String, password: String, fullName: String, role: String) =
-        api.adminCreateUser(CreateUserRequest(email, password, fullName, role))
-    suspend fun adminSetActive(id: Long, active: Boolean) = api.adminUpdateUser(id, mapOf("active" to active))
+    suspend fun adminCreateUser(email: String, password: String, firstName: String, lastName: String, middleName: String, role: String) =
+        api.adminCreateUser(CreateUserRequest(email, password, firstName, lastName, middleName, role))
+    suspend fun adminUpdateUser(id: Long, firstName: String, lastName: String, middleName: String, active: Boolean, role: String) =
+        api.adminUpdateUser(id, UpdateUserRequest(firstName, lastName, middleName, active, role))
+    suspend fun adminGroups() = api.adminGroups()
+    suspend fun adminCreateGroup(name: String, curatorId: Long?) = api.adminCreateGroup(CreateGroupRequest(name, curatorId))
+    suspend fun adminUpdateGroup(id: Long, name: String, curatorId: Long?) = api.adminUpdateGroup(id, UpdateGroupRequest(name, curatorId))
+    suspend fun adminDeleteGroup(id: Long) = api.adminDeleteGroup(id)
 
     suspend fun deleteAvatar() = api.deleteAvatar()
 

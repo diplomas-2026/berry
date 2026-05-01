@@ -96,6 +96,7 @@ fun AppRoot() {
                 }
                 composable("chef_scan") { ChefScanScreen(appState.repository()) }
                 composable("admin_users") { AdminUsersScreen(appState.repository()) }
+                composable("admin_groups") { AdminGroupsScreen(appState.repository()) }
                 composable("profile") { ProfileScreen(appState) }
             }
         }

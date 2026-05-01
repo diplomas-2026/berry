@@ -26,6 +26,16 @@ public class AuthService {
             throw new BadCredentialsException("Неверный логин или пароль");
         }
         String token = jwtService.generateToken(user.getId(), user.getEmail(), user.getRole().name());
-        return new AuthDtos.AuthResponse(token, user.getId(), user.getEmail(), user.getFullName(), user.getRole(), user.getAvatarPath());
+        return new AuthDtos.AuthResponse(
+                token,
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getMiddleName(),
+                user.getFullName(),
+                user.getRole(),
+                user.getAvatarPath()
+        );
     }
 }

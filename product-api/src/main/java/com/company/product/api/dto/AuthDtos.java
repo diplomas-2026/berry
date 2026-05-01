@@ -6,5 +6,5 @@ import jakarta.validation.constraints.NotBlank;
 
 public class AuthDtos {
     public record LoginRequest(@Email String email, @NotBlank String password) {}
-    public record AuthResponse(String token, Long userId, String email, String fullName, UserRole role, String avatarUrl) {}
+    public record AuthResponse(String token, Long userId, String email, String firstName, String lastName, String middleName, String fullName, UserRole role, String avatarUrl) {}
 }

@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.Dining
 import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QrCode2
@@ -89,7 +90,8 @@ fun HomeScreen(session: SessionUi?, onOpen: (String) -> Unit, onLogout: () -> Un
                 )
 
                 "ADMIN" -> listOf(
-                    HomeTile("Пользователи", Icons.Default.People) { onOpen("admin_users") }
+                    HomeTile("Пользователи", Icons.Default.People) { onOpen("admin_users") },
+                    HomeTile("Группы", Icons.Default.Groups) { onOpen("admin_groups") }
                 )
 
                 else -> emptyList()

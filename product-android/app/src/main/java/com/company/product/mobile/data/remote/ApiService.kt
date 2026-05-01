@@ -63,7 +63,19 @@ interface ApiService {
     suspend fun adminCreateUser(@Body body: CreateUserRequest): UserDto
 
     @PATCH("api/admin/users/{id}")
-    suspend fun adminUpdateUser(@Path("id") id: Long, @Body body: Map<String, Boolean>): UserDto
+    suspend fun adminUpdateUser(@Path("id") id: Long, @Body body: UpdateUserRequest): UserDto
+
+    @GET("api/admin/groups")
+    suspend fun adminGroups(): List<GroupDto>
+
+    @POST("api/admin/groups")
+    suspend fun adminCreateGroup(@Body body: CreateGroupRequest): GroupDto
+
+    @PATCH("api/admin/groups/{id}")
+    suspend fun adminUpdateGroup(@Path("id") id: Long, @Body body: UpdateGroupRequest): GroupDto
+
+    @DELETE("api/admin/groups/{id}")
+    suspend fun adminDeleteGroup(@Path("id") id: Long)
 
     @Multipart
     @POST("api/profile/avatar")

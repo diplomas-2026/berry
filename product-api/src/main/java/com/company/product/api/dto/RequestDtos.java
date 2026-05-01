@@ -11,9 +11,10 @@ import java.time.LocalDate;
 import java.util.List;
 
 public class RequestDtos {
-    public record CreateUserRequest(@Email String email, @NotBlank String password, @NotBlank String fullName, @NotNull UserRole role) {}
-    public record UpdateUserRequest(@NotNull Boolean active) {}
+    public record CreateUserRequest(@Email String email, @NotBlank String password, @NotBlank String firstName, @NotBlank String lastName, @NotBlank String middleName, @NotNull UserRole role) {}
+    public record UpdateUserRequest(@NotBlank String firstName, @NotBlank String lastName, @NotBlank String middleName, @NotNull Boolean active, @NotNull UserRole role) {}
     public record CreateGroupRequest(@NotBlank String name, Long curatorId) {}
+    public record UpdateGroupRequest(@NotBlank String name, Long curatorId) {}
     public record AssignStudentRequest(@NotNull Long studentId) {}
     public record IssueVoucherRequest(@NotNull Long studentId, @NotNull LocalDate date, @NotEmpty List<MealSlot> slots) {}
     public record CreateDishRequest(@NotBlank String name, String description) {}
