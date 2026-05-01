@@ -13,14 +13,45 @@ import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.RestaurantMenu
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.company.product.mobile.presentation.SessionUi
 
 @Composable
 fun HomeScreen(session: SessionUi?, onOpen: (String) -> Unit, onLogout: () -> Unit) {
+    var showLogoutDialog by remember { mutableStateOf(false) }
+
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text("Выйти из аккаунта?") },
+            text = { Text("Подтвердите, что хотите завершить текущую сессию.") },
+            confirmButton = {
+                Button(onClick = {
+                    showLogoutDialog = false
+                    onLogout()
+                }) {
+                    Text("Выйти")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutDialog = false }) {
+                    Text("Отмена")
+                }
+            }
+        )
+    }
+
     ScreenContainer("Главная") {
         SectionCard(
             title = session?.fullName ?: "Пользователь",
@@ -67,7 +98,7 @@ fun HomeScreen(session: SessionUi?, onOpen: (String) -> Unit, onLogout: () -> Un
             TileGrid(
                 entries + listOf(
                     HomeTile("Профиль", Icons.Default.Person) { onOpen("profile") },
-                    HomeTile("Выйти", Icons.Default.Logout) { onLogout() }
+                    HomeTile("Выйти", Icons.Default.Logout) { showLogoutDialog = true }
                 )
             )
         }
