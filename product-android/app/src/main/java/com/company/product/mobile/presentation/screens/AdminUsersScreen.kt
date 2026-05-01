@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -43,6 +44,9 @@ fun AdminUsersScreen(repo: AppRepository) {
     var middleName by remember { mutableStateOf("") }
     var role by remember { mutableStateOf("STUDENT") }
     var active by remember { mutableStateOf(true) }
+    var query by remember { mutableStateOf("") }
+    var roleFilter by remember { mutableStateOf("ALL") }
+    var sortMode by remember { mutableStateOf("name") }
 
     val roleOptions = remember {
         listOf(
@@ -92,17 +96,64 @@ fun AdminUsersScreen(repo: AppRepository) {
 
     LaunchedEffect(Unit) { reload() }
 
+    val visibleUsers = remember(users, query, roleFilter, sortMode) {
+        users
+            .filter { user ->
+                val matchesQuery = query.isBlank() ||
+                    user.fullName.contains(query, ignoreCase = true) ||
+                    user.email.contains(query, ignoreCase = true)
+                val matchesRole = roleFilter == "ALL" || user.role == roleFilter
+                matchesQuery && matchesRole
+            }
+            .sortedWith(
+                when (sortMode) {
+                    "email" -> compareBy { it.email.lowercase() }
+                    else -> compareBy<UserDto> { it.fullName.lowercase() }.thenBy { it.id }
+                }
+            )
+    }
+
     ScreenContainer("Пользователи") {
         SectionCard(title = "Список пользователей", subtitle = "Можно редактировать ФИО, роль и активность") {
-            Button(onClick = { reload() }, modifier = Modifier.fillMaxWidth()) { Text("Обновить список") }
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    label = { Text("Поиск") },
+                    placeholder = { Text("Имя или email") },
+                    leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Роль", style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf("ALL" to "Все", "STUDENT" to "Студенты", "CURATOR" to "Кураторы", "CHEF" to "Повара", "ADMIN" to "Админы").forEach { (value, label) ->
+                            FilterChip(selected = roleFilter == value, onClick = { roleFilter = value }, label = { Text(label) })
+                        }
+                    }
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Сортировка", style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf("name" to "По имени", "email" to "По email").forEach { (value, label) ->
+                            FilterChip(selected = sortMode == value, onClick = { sortMode = value }, label = { Text(label) })
+                        }
+                    }
+                }
+                Button(onClick = { reload() }, modifier = Modifier.fillMaxWidth()) { Text("Обновить список") }
+            }
             if (loading) CenterLoading()
-            if (users.isEmpty() && !loading) {
+            if (visibleUsers.isEmpty() && !loading) {
                 EmptyStateCard(
                     title = "Пользователи не найдены",
-                    subtitle = "Сейчас список пользователей пуст"
+                    subtitle = if (query.isNotBlank() || roleFilter != "ALL") {
+                        "Ничего не найдено по текущему поиску и фильтрам"
+                    } else {
+                        "Сейчас список пользователей пуст"
+                    }
                 )
             } else {
-                users.forEach { user ->
+                visibleUsers.forEach { user ->
                     SectionCard(
                         title = user.fullName,
                         subtitle = "${user.email} • ${roleLabel(user.role)}"

@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -40,6 +41,8 @@ fun AdminGroupsScreen(repo: AppRepository) {
     var editingId by remember { mutableStateOf<Long?>(null) }
     var name by remember { mutableStateOf("") }
     var curatorId by remember { mutableStateOf<Long?>(null) }
+    var query by remember { mutableStateOf("") }
+    var sortMode by remember { mutableStateOf("name") }
     val scope = rememberCoroutineScope()
 
     fun clearForm() {
@@ -71,17 +74,47 @@ fun AdminGroupsScreen(repo: AppRepository) {
 
     LaunchedEffect(Unit) { reload() }
 
+    val visibleGroups = remember(groups, query, sortMode) {
+        groups
+            .filter { group ->
+                query.isBlank() ||
+                    group.name.contains(query, ignoreCase = true) ||
+                    group.curatorName.orEmpty().contains(query, ignoreCase = true)
+            }
+            .sortedWith(
+                when (sortMode) {
+                    "curator" -> compareBy<GroupDto> { it.curatorName.orEmpty().lowercase() }.thenBy { it.name.lowercase() }
+                    else -> compareBy { it.name.lowercase() }
+                }
+            )
+    }
+
     ScreenContainer("Группы") {
         SectionCard(title = "Список групп", subtitle = "Можно менять название и куратора") {
-            Button(onClick = { reload() }, modifier = Modifier.fillMaxWidth()) { Text("Обновить список") }
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    label = { Text("Поиск") },
+                    placeholder = { Text("Название группы или куратор") },
+                    leadingIcon = { Icon(imageVector = Search, contentDescription = null) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf("name" to "По названию", "curator" to "По куратору").forEach { (value, label) ->
+                        FilterChip(selected = sortMode == value, onClick = { sortMode = value }, label = { Text(label) })
+                    }
+                }
+                Button(onClick = { reload() }, modifier = Modifier.fillMaxWidth()) { Text("Обновить список") }
+            }
             if (loading) CenterLoading()
-            if (groups.isEmpty() && !loading) {
+            if (visibleGroups.isEmpty() && !loading) {
                 EmptyStateCard(
                     title = "Группы не найдены",
-                    subtitle = "Сейчас список групп пуст"
+                    subtitle = if (query.isNotBlank()) "Ничего не найдено по текущему поиску" else "Сейчас список групп пуст"
                 )
             } else {
-                groups.forEach { group ->
+                visibleGroups.forEach { group ->
                     SectionCard(
                         title = group.name,
                         subtitle = group.curatorName ?: "Куратор не назначен"

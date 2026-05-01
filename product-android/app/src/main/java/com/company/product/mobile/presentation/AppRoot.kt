@@ -50,7 +50,21 @@ fun AppRoot() {
                         }
                     )
                 }
-                composable("student_menu") { StudentMenuScreen(appState.repository()) }
+                composable("student_menu") {
+                    StudentMenuScreen(
+                        appState.repository(),
+                        onDishClick = { dishId -> nav.navigate("dish_details/$dishId") }
+                    )
+                }
+                composable(
+                    route = "dish_details/{dishId}",
+                    arguments = listOf(navArgument("dishId") { type = NavType.LongType })
+                ) { backStackEntry ->
+                    DishDetailsScreen(
+                        repo = appState.repository(),
+                        dishId = backStackEntry.arguments?.getLong("dishId") ?: 0L
+                    )
+                }
                 composable("student_vouchers") { StudentVouchersScreen(appState.repository()) }
                 composable("student_qr") { StudentQrScreen(appState.repository()) }
                 composable("curator_students") { CuratorStudentsScreen(appState.repository()) }
@@ -59,7 +73,8 @@ fun AppRoot() {
                     ChefMenuScreen(
                         repo = appState.repository(),
                         onAdd = { date -> nav.navigate("chef_menu_add/$date") },
-                        onEdit = { date, itemId -> nav.navigate("chef_menu_edit/$date/$itemId") }
+                        onEdit = { date, itemId -> nav.navigate("chef_menu_edit/$date/$itemId") },
+                        onDishClick = { dishId -> nav.navigate("dish_details/$dishId") }
                     )
                 }
                 composable(
@@ -109,7 +124,12 @@ fun AppRoot() {
                         }
                     )
                 }
-                composable("chef_scan") { ChefScanScreen(appState.repository()) }
+                composable("chef_scan") {
+                    ChefScanScreen(
+                        repo = appState.repository(),
+                        onDishClick = { dishId -> nav.navigate("dish_details/$dishId") }
+                    )
+                }
                 composable("admin_users") { AdminUsersScreen(appState.repository()) }
                 composable("admin_groups") { AdminGroupsScreen(appState.repository()) }
                 composable("profile") { ProfileScreen(appState) }

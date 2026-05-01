@@ -6,9 +6,12 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,7 +30,7 @@ import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 @Composable
-fun ChefScanScreen(repo: AppRepository) {
+fun ChefScanScreen(repo: AppRepository, onDishClick: (Long) -> Unit = {}) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var cameraPermissionGranted by remember {
@@ -40,6 +43,9 @@ fun ChefScanScreen(repo: AppRepository) {
     var message by remember { mutableStateOf("") }
     var loading by remember { mutableStateOf(false) }
     var scannedOnce by remember { mutableStateOf(false) }
+    var query by remember { mutableStateOf("") }
+    var voucherFilter by remember { mutableStateOf("ALL") }
+    var sortMode by remember { mutableStateOf("slot") }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
@@ -134,12 +140,60 @@ fun ChefScanScreen(repo: AppRepository) {
         }
 
         if (scanResult != null) {
+            val visibleVouchers = scanResult!!.activeVouchers
+                .filter { voucher ->
+                    val matchesQuery = query.isBlank() ||
+                        voucher.studentName.contains(query, ignoreCase = true) ||
+                        mealSlotLabel(voucher.mealSlot).contains(query, ignoreCase = true) ||
+                        voucherStatusLabel(voucher.status).contains(query, ignoreCase = true)
+                    val matchesFilter = voucherFilter == "ALL" || voucher.status == voucherFilter
+                    matchesQuery && matchesFilter
+                }
+                .sortedWith(
+                    when (sortMode) {
+                        "status" -> compareBy<com.company.product.mobile.data.remote.VoucherDto> { voucherStatusSortIndex(it.status) }.thenByDescending { it.issueDate }
+                        else -> compareByDescending<com.company.product.mobile.data.remote.VoucherDto> { it.issueDate }.thenBy { it.id }
+                    }
+                )
+            val visibleMenuItems = scanResult!!.menuItems
+                .filter { item ->
+                    query.isBlank() ||
+                        item.dish.name.contains(query, ignoreCase = true) ||
+                        item.dish.description.orEmpty().contains(query, ignoreCase = true) ||
+                        mealSlotLabel(item.mealSlot).contains(query, ignoreCase = true)
+                }
+                .sortedBy { chefMenuScanSortIndex(it.mealSlot) }
+
             SectionCard(title = "Студент", subtitle = scanResult!!.student.fullName) {
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    label = { Text("Поиск") },
+                    placeholder = { Text("Талон или блюдо") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Фильтр талонов")
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf("ALL" to "Все", "ISSUED" to "Выданы", "REDEEMED" to "Погашены").forEach { (value, label) ->
+                            FilterChip(selected = voucherFilter == value, onClick = { voucherFilter = value }, label = { Text(label) })
+                        }
+                    }
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Сортировка")
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf("slot" to "По приёму", "status" to "По статусу").forEach { (value, label) ->
+                            FilterChip(selected = sortMode == value, onClick = { sortMode = value }, label = { Text(label) })
+                        }
+                    }
+                }
+
                 Text("Доступные талоны:")
-                if (scanResult!!.activeVouchers.isEmpty()) {
+                if (visibleVouchers.isEmpty()) {
                     Text("Активных талонов нет")
                 } else {
-                    scanResult!!.activeVouchers.forEach { voucher ->
+                    visibleVouchers.forEach { voucher ->
                         SectionCard(
                             title = "Талон #${voucher.id}",
                             subtitle = "${mealSlotLabel(voucher.mealSlot)} • ${voucherStatusLabel(voucher.status)} • ${formatDate(voucher.issueDate)}"
@@ -166,11 +220,17 @@ fun ChefScanScreen(repo: AppRepository) {
                     }
                 }
                 Text("Блюда к выдаче:")
-                if (scanResult!!.menuItems.isEmpty()) {
+                if (visibleMenuItems.isEmpty()) {
                     Text("Для этого студента меню на выбранную дату не найдено")
                 } else {
-                    scanResult!!.menuItems.forEach {
-                        Text("${mealSlotLabel(it.mealSlot)}: ${it.dish.name}")
+                    visibleMenuItems.forEach {
+                        SectionCard(
+                            title = "${mealSlotLabel(it.mealSlot)}: ${it.dish.name}",
+                            subtitle = formatDate(it.date),
+                            onClick = { onDishClick(it.dish.id) }
+                        ) {
+                            Text(it.dish.description ?: "Нет описания")
+                        }
                     }
                 }
             }
@@ -184,4 +244,19 @@ fun ChefScanScreen(repo: AppRepository) {
             }
         }
     }
+}
+
+private fun chefMenuScanSortIndex(slot: String): Int = when (slot) {
+    "BREAKFAST" -> 0
+    "LUNCH" -> 1
+    "DINNER" -> 2
+    else -> Int.MAX_VALUE
+}
+
+private fun voucherStatusSortIndex(status: String): Int = when (status) {
+    "ISSUED" -> 0
+    "REDEEMED" -> 1
+    "EXPIRED" -> 2
+    "CANCELLED" -> 3
+    else -> Int.MAX_VALUE
 }

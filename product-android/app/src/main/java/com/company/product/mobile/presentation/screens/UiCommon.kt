@@ -117,12 +117,16 @@ fun CenterLoading() {
 fun SectionCard(
     title: String,
     subtitle: String? = null,
+    modifier: Modifier = Modifier,
     containerColor: Color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
     borderColor: Color? = null,
+    onClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
+    val cardModifier = modifier.fillMaxWidth()
+    val clickableModifier = if (onClick != null) cardModifier.clickable(onClick = onClick) else cardModifier
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = clickableModifier,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = containerColor),
         border = borderColor?.let { BorderStroke(1.dp, it) },

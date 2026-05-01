@@ -36,6 +36,9 @@ interface ApiService {
     @GET("api/chef/dishes")
     suspend fun chefDishes(): List<DishDto>
 
+    @GET("api/dishes/{id}")
+    suspend fun dish(@Path("id") id: Long): DishDto
+
     @Multipart
     @POST("api/chef/dishes")
     suspend fun chefCreateDish(

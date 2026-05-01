@@ -1,6 +1,5 @@
 package com.company.product.mobile.presentation.screens
 
-import android.app.DatePickerDialog
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,13 +11,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,29 +26,28 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.company.product.mobile.data.remote.MenuItemDto
 import com.company.product.mobile.data.repository.AppRepository
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-private val chefMealOrder = listOf("BREAKFAST", "LUNCH", "DINNER")
-
 @Composable
 fun ChefMenuScreen(
     repo: AppRepository,
     onAdd: (String) -> Unit,
-    onEdit: (String, Long) -> Unit
+    onEdit: (String, Long) -> Unit,
+    onDishClick: (Long) -> Unit = {}
 ) {
-    val context = LocalContext.current
-
     var menuDates by remember { mutableStateOf<List<String>>(emptyList()) }
     var menuItems by remember { mutableStateOf<List<MenuItemDto>>(emptyList()) }
     var selectedDate by remember { mutableStateOf(LocalDate.now().toString()) }
     var loading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
     var initialized by remember { mutableStateOf(false) }
+    var query by remember { mutableStateOf("") }
+    var mealFilter by remember { mutableStateOf("ALL") }
+    var sortMode by remember { mutableStateOf("slot") }
 
     suspend fun loadDates() {
         menuDates = repo.chefMenuDates()
@@ -97,6 +96,24 @@ fun ChefMenuScreen(
         (menuDates + selectedDate).distinct().sortedDescending()
     }
 
+    val visibleItems = remember(menuItems, query, mealFilter, sortMode) {
+        menuItems
+            .filter { item ->
+                val matchesQuery = query.isBlank() ||
+                    item.dish.name.contains(query, ignoreCase = true) ||
+                    item.dish.description.orEmpty().contains(query, ignoreCase = true) ||
+                    mealSlotLabel(item.mealSlot).contains(query, ignoreCase = true)
+                val matchesFilter = mealFilter == "ALL" || item.mealSlot == mealFilter
+                matchesQuery && matchesFilter
+            }
+            .sortedWith(
+                when (sortMode) {
+                    "name" -> compareBy { it.dish.name.lowercase() }
+                    else -> compareBy<MenuItemDto> { menuSlotSortIndex(it.mealSlot) }.thenBy { it.dish.name.lowercase() }
+                }
+            )
+    }
+
     ScreenContainer("Меню повара") {
         SectionCard(
             title = "Меню по датам",
@@ -123,21 +140,39 @@ fun ChefMenuScreen(
                     }
                 }
 
-                TextButton(
-                    onClick = {
-                        val current = runCatching { LocalDate.parse(selectedDate) }.getOrElse { LocalDate.now() }
-                        DatePickerDialog(
-                            context,
-                            { _, year, month, day ->
-                                selectedDate = LocalDate.of(year, month + 1, day).toString()
-                            },
-                            current.year,
-                            current.monthValue - 1,
-                            current.dayOfMonth
-                        ).show()
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    label = { Text("Поиск") },
+                    placeholder = { Text("Название блюда или приём пищи") },
+                    leadingIcon = { Icon(imageVector = Icons.Default.Search, contentDescription = null) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Фильтр", style = MaterialTheme.typography.labelLarge)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf("ALL" to "Все", "BREAKFAST" to "Завтрак", "LUNCH" to "Обед", "DINNER" to "Ужин").forEach { (value, label) ->
+                            FilterChip(
+                                selected = mealFilter == value,
+                                onClick = { mealFilter = value },
+                                label = { Text(label) }
+                            )
+                        }
                     }
-                ) {
-                    Text("Выбрать другой день")
+                }
+
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Сортировка", style = MaterialTheme.typography.labelLarge)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf("slot" to "По приёму", "name" to "По названию").forEach { (value, label) ->
+                            FilterChip(
+                                selected = sortMode == value,
+                                onClick = { sortMode = value },
+                                label = { Text(label) }
+                            )
+                        }
+                    }
                 }
 
                 Button(
@@ -160,14 +195,22 @@ fun ChefMenuScreen(
         }
 
         if (!loading && error == null) {
-            if (menuItems.isEmpty()) {
+            if (visibleItems.isEmpty()) {
                 EmptyStateCard(
                     title = "На эту дату меню не назначено",
-                    subtitle = "Нажмите «Добавить блюдо», чтобы создать меню на выбранный день"
+                    subtitle = if (query.isNotBlank() || mealFilter != "ALL") {
+                        "Ничего не найдено по текущему поиску и фильтрам"
+                    } else {
+                        "Нажмите «Добавить блюдо», чтобы создать меню на выбранный день"
+                    }
                 )
             } else {
-                menuItems.sortedBy { chefMealOrder.indexOf(it.mealSlot).let { index -> if (index == -1) Int.MAX_VALUE else index } }.forEach { item ->
-                    SectionCard(title = "", subtitle = null) {
+                visibleItems.forEach { item ->
+                    SectionCard(
+                        title = "",
+                        subtitle = null,
+                        onClick = { onDishClick(item.dish.id) }
+                    ) {
                         MediaFrame(
                             url = item.dish.photoUrl,
                             placeholderTitle = "Фото блюда отсутствует",
@@ -208,4 +251,11 @@ fun ChefMenuScreen(
             }
         }
     }
+}
+
+private fun menuSlotSortIndex(slot: String): Int = when (slot) {
+    "BREAKFAST" -> 0
+    "LUNCH" -> 1
+    "DINNER" -> 2
+    else -> Int.MAX_VALUE
 }

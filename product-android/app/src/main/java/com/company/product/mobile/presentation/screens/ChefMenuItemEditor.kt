@@ -59,7 +59,23 @@ fun ChefMenuItemEditor(
 ) {
     val context = LocalContext.current
     var dishMenuExpanded by remember { mutableStateOf(false) }
+    var dishQuery by remember { mutableStateOf("") }
+    var dishSortMode by remember { mutableStateOf("name") }
     val selectedDish = dishes.firstOrNull { it.id == selectedDishId }
+    val visibleDishes = remember(dishes, dishQuery, dishSortMode) {
+        dishes
+            .filter { dish ->
+                dishQuery.isBlank() ||
+                    dish.name.contains(dishQuery, ignoreCase = true) ||
+                    dish.description.orEmpty().contains(dishQuery, ignoreCase = true)
+            }
+            .sortedWith(
+                when (dishSortMode) {
+                    "photo" -> compareByDescending<DishDto> { !it.photoUrl.isNullOrBlank() }.thenBy { it.name.lowercase() }
+                    else -> compareBy { it.name.lowercase() }
+                }
+            )
+    }
 
     ScreenContainer(title) {
         SectionCard(title = subtitle, subtitle = null) {
@@ -116,6 +132,23 @@ fun ChefMenuItemEditor(
 
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     OutlinedTextField(
+                        value = dishQuery,
+                        onValueChange = { dishQuery = it },
+                        label = { Text("Поиск блюда") },
+                        placeholder = { Text("Название или описание") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Text("Сортировка блюд", style = MaterialTheme.typography.labelLarge)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf("name" to "По названию", "photo" to "С фото").forEach { (value, label) ->
+                            FilterChip(
+                                selected = dishSortMode == value,
+                                onClick = { dishSortMode = value },
+                                label = { Text(label) }
+                            )
+                        }
+                    }
+                    OutlinedTextField(
                         value = selectedDish?.name.orEmpty(),
                         onValueChange = {},
                         readOnly = true,
@@ -129,7 +162,7 @@ fun ChefMenuItemEditor(
                         onDismissRequest = { dishMenuExpanded = false },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        dishes.forEach { dish ->
+                        visibleDishes.forEach { dish ->
                             DropdownMenuItem(
                                 text = { Text(dish.name) },
                                 onClick = {

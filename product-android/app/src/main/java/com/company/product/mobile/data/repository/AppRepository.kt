@@ -34,6 +34,7 @@ class AppRepository(
         api.issueVoucher(IssueVoucherRequest(studentId, date, slots))
 
     suspend fun chefDishes() = api.chefDishes()
+    suspend fun dish(id: Long) = api.dish(id)
     suspend fun chefCreateDish(
         context: Context,
         name: String,
