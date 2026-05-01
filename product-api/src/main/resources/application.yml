@@ -21,3 +21,4 @@ app:
     expiration-minutes: 480
   storage:
     root-dir: ${STORAGE_ROOT:uploads}
+  users-file: ${APP_USERS_FILE:users.txt}

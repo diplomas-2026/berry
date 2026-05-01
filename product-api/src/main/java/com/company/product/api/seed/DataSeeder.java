@@ -3,6 +3,7 @@ package com.company.product.api.seed;
 import com.company.product.api.entity.*;
 import com.company.product.api.repository.*;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -20,14 +21,24 @@ public class DataSeeder implements CommandLineRunner {
     private final DishRepository dishRepository;
     private final MenuItemRepository menuItemRepository;
     private final PasswordEncoder passwordEncoder;
+    private final String usersFilePath;
 
-    public DataSeeder(AppUserRepository userRepository, StudentGroupRepository groupRepository, GroupMemberRepository memberRepository, DishRepository dishRepository, MenuItemRepository menuItemRepository, PasswordEncoder passwordEncoder) {
+    public DataSeeder(
+            AppUserRepository userRepository,
+            StudentGroupRepository groupRepository,
+            GroupMemberRepository memberRepository,
+            DishRepository dishRepository,
+            MenuItemRepository menuItemRepository,
+            PasswordEncoder passwordEncoder,
+            @Value("${app.users-file:users.txt}") String usersFilePath
+    ) {
         this.userRepository = userRepository;
         this.groupRepository = groupRepository;
         this.memberRepository = memberRepository;
         this.dishRepository = dishRepository;
         this.menuItemRepository = menuItemRepository;
         this.passwordEncoder = passwordEncoder;
+        this.usersFilePath = usersFilePath;
     }
 
     @Override
@@ -125,6 +136,13 @@ public class DataSeeder implements CommandLineRunner {
                 "email=student1@pgk.local; password=student123; role=STUDENT",
                 "email=student2@pgk.local; password=student123; role=STUDENT"
         );
-        Files.write(Path.of("users.txt"), lines);
+        Path target = Path.of(usersFilePath);
+        if (Files.exists(target) && Files.isDirectory(target)) {
+            target = target.resolve("users.txt");
+        }
+        if (target.getParent() != null) {
+            Files.createDirectories(target.getParent());
+        }
+        Files.write(target, lines);
     }
 }
