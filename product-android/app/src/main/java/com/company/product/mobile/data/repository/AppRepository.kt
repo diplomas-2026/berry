@@ -1,0 +1,54 @@
+package com.company.product.mobile.data.repository
+
+import android.content.Context
+import android.net.Uri
+import com.company.product.mobile.data.remote.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.time.LocalDate
+
+class AppRepository(
+    private val api: ApiService,
+    private val sessionStore: com.company.product.mobile.data.local.SessionStore
+) {
+    suspend fun login(email: String, password: String): AuthResponse {
+        val result = api.login(LoginRequest(email, password))
+        sessionStore.saveToken(result.token)
+        return result
+    }
+
+    fun logout() = sessionStore.clear()
+
+    suspend fun me(): UserDto = api.me()
+
+    suspend fun studentMenu() = api.studentTodayMenu()
+    suspend fun studentVouchers() = api.studentVouchers()
+    suspend fun studentQr() = api.studentQr()
+
+    suspend fun curatorStudents() = api.curatorStudents()
+    suspend fun issueVouchers(studentId: Long, date: String, slots: List<String>) =
+        api.issueVoucher(IssueVoucherRequest(studentId, date, slots))
+
+    suspend fun chefMenu() = api.chefMenuCurrent()
+    suspend fun chefScan(studentId: Long, date: String = LocalDate.now().toString()) =
+        api.chefScan(QrPayload(studentId, date))
+    suspend fun chefRedeem(voucherId: Long) = api.chefRedeem(RedeemRequest(voucherId))
+
+    suspend fun adminUsers() = api.adminUsers()
+    suspend fun adminCreateUser(email: String, password: String, fullName: String, role: String) =
+        api.adminCreateUser(CreateUserRequest(email, password, fullName, role))
+    suspend fun adminSetActive(id: Long, active: Boolean) = api.adminUpdateUser(id, mapOf("active" to active))
+
+    suspend fun deleteAvatar() = api.deleteAvatar()
+
+    suspend fun uploadAvatar(context: Context, uri: Uri): UserDto = withContext(Dispatchers.IO) {
+        val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
+            ?: error("Не удалось прочитать файл")
+        val body = bytes.toRequestBody("image/*".toMediaTypeOrNull())
+        val part = MultipartBody.Part.createFormData("file", "avatar.jpg", body)
+        api.uploadAvatar(part)
+    }
+}
