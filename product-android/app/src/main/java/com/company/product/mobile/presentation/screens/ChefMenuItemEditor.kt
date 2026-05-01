@@ -2,6 +2,7 @@ package com.company.product.mobile.presentation.screens
 
 import android.app.DatePickerDialog
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,10 +15,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExposedDropdownMenu
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -115,24 +114,20 @@ fun ChefMenuItemEditor(
                     }
                 }
 
-                ExposedDropdownMenuBox(
-                    expanded = dishMenuExpanded,
-                    onExpandedChange = { dishMenuExpanded = !dishMenuExpanded }
-                ) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     OutlinedTextField(
                         value = selectedDish?.name.orEmpty(),
                         onValueChange = {},
                         readOnly = true,
                         label = { Text("Блюдо") },
                         placeholder = { Text("Выберите блюдо") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dishMenuExpanded) },
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth()
+                            .clickable { dishMenuExpanded = true }
                     )
-                    ExposedDropdownMenu(
+                    DropdownMenu(
                         expanded = dishMenuExpanded,
-                        onDismissRequest = { dishMenuExpanded = false }
+                        onDismissRequest = { dishMenuExpanded = false },
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         dishes.forEach { dish ->
                             DropdownMenuItem(
