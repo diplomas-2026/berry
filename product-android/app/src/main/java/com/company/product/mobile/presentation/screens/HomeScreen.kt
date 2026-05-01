@@ -24,7 +24,9 @@ fun HomeScreen(session: SessionUi?, onOpen: (String) -> Unit, onLogout: () -> Un
     ScreenContainer("Главная") {
         SectionCard(
             title = session?.fullName ?: "Пользователь",
-            subtitle = session?.email ?: "-"
+            subtitle = session?.email ?: "-",
+            containerColor = MaterialTheme.colorScheme.background.copy(alpha = 0.72f),
+            borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.40f)
         ) {
             StatusPill("Роль: ${roleLabel(session?.role)}")
         }
