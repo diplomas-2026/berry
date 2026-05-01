@@ -18,7 +18,7 @@ server:
 app:
   jwt:
     secret: ${JWT_SECRET:very-secret-key-for-local-dev-please-change}
-    expiration-minutes: 480
+    expiration-minutes: 5256000
   storage:
     root-dir: ${STORAGE_ROOT:uploads}
   users-file: ${APP_USERS_FILE:users.txt}
