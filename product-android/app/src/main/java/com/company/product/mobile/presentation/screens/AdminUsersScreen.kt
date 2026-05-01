@@ -52,20 +52,27 @@ fun AdminUsersScreen(repo: AppRepository) {
         SectionCard(title = "Список пользователей") {
             Button(onClick = { reload() }, modifier = Modifier.fillMaxWidth()) { Text("Обновить список") }
             if (loading) CenterLoading()
-            users.forEach { user ->
-                SectionCard(title = user.fullName, subtitle = "${user.email} • ${roleLabel(user.role)}") {
-                    StatusPill(if (user.active) "Активен" else "Отключён")
-                    Button(onClick = {
-                        scope.launch {
-                            try {
-                                repo.adminSetActive(user.id, !user.active)
-                                reload()
-                            } catch (e: Exception) {
-                                message = "Ошибка: ${e.message}"
+            if (users.isEmpty()) {
+                EmptyStateCard(
+                    title = "Пользователи не найдены",
+                    subtitle = "Сейчас список пользователей пуст"
+                )
+            } else {
+                users.forEach { user ->
+                    SectionCard(title = user.fullName, subtitle = "${user.email} • ${roleLabel(user.role)}") {
+                        StatusPill(if (user.active) "Активен" else "Отключён")
+                        Button(onClick = {
+                            scope.launch {
+                                try {
+                                    repo.adminSetActive(user.id, !user.active)
+                                    reload()
+                                } catch (e: Exception) {
+                                    message = "Ошибка: ${e.message}"
+                                }
                             }
+                        }, modifier = Modifier.fillMaxWidth()) {
+                            Text(if (user.active) "Деактивировать" else "Активировать")
                         }
-                    }, modifier = Modifier.fillMaxWidth()) {
-                        Text(if (user.active) "Деактивировать" else "Активировать")
                     }
                 }
             }

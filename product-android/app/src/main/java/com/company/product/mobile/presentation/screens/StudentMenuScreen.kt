@@ -74,12 +74,10 @@ fun StudentMenuScreen(repo: AppRepository) {
 
         if (!loading && error == null) {
             if (selectedItems.isEmpty()) {
-                SectionCard(
+                EmptyStateCard(
                     title = "На выбранную дату меню нет",
                     subtitle = selectedDate?.let { formatDate(it) } ?: "Дата не выбрана"
-                ) {
-                    Text("Попробуйте выбрать другую дату.")
-                }
+                )
             } else {
                 selectedItems.forEach {
                     SectionCard(
@@ -89,7 +87,7 @@ fun StudentMenuScreen(repo: AppRepository) {
                         MediaFrame(
                             url = it.dish.photoUrl,
                             placeholderTitle = "Фото блюда отсутствует",
-                            placeholderSubtitle = "Заглушка для блюда",
+                            placeholderSubtitle = "",
                             aspectRatio = 16f / 9f
                         )
                         Text(

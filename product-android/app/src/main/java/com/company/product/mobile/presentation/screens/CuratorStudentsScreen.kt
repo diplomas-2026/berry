@@ -28,9 +28,16 @@ fun CuratorStudentsScreen(repo: AppRepository) {
     ScreenContainer("Студенты группы") {
         if (loading) CenterLoading()
         if (error != null) ErrorCard(error!!)
-        students.forEach {
-            SectionCard(title = it.fullName, subtitle = it.email) {
-                Text("ID: ${it.id}")
+        if (students.isEmpty()) {
+            EmptyStateCard(
+                title = "Студенты не найдены",
+                subtitle = "В этой группе пока нет студентов"
+            )
+        } else {
+            students.forEach {
+                SectionCard(title = it.fullName, subtitle = it.email) {
+                    Text("ID: ${it.id}")
+                }
             }
         }
     }

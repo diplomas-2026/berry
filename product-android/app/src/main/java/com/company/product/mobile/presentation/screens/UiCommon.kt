@@ -181,3 +181,16 @@ fun ErrorCard(
         }
     }
 }
+
+@Composable
+fun EmptyStateCard(
+    title: String,
+    subtitle: String? = null
+) {
+    SectionCard(title = title, subtitle = subtitle) {
+        Text(
+            text = "Здесь пока пусто",
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}

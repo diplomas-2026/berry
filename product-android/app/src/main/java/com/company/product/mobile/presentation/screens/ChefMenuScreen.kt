@@ -29,27 +29,34 @@ fun ChefMenuScreen(repo: AppRepository) {
     ScreenContainer("Текущее меню") {
         if (loading) CenterLoading()
         if (error != null) ErrorCard(error!!)
-        menu.forEach {
-            SectionCard(
-                title = "",
-                subtitle = null
-            ) {
-                MediaFrame(
-                    url = it.dish.photoUrl,
-                    placeholderTitle = "Фото блюда отсутствует",
-                    placeholderSubtitle = "Повар может загрузить фото позже",
-                    aspectRatio = 16f / 9f
-                )
-                Text(
-                    text = "${mealSlotLabel(it.mealSlot)}: ${it.dish.name}",
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Text(
-                    text = formatDate(it.date),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                if (!it.dish.description.isNullOrBlank()) Text(it.dish.description)
+        if (menu.isEmpty()) {
+            EmptyStateCard(
+                title = "Меню не найдено",
+                subtitle = "На текущий момент для повара нет ни одного блюда"
+            )
+        } else {
+            menu.forEach {
+                SectionCard(
+                    title = "",
+                    subtitle = null
+                ) {
+                    MediaFrame(
+                        url = it.dish.photoUrl,
+                        placeholderTitle = "Фото блюда отсутствует",
+                        placeholderSubtitle = "Повар может загрузить фото позже",
+                        aspectRatio = 16f / 9f
+                    )
+                    Text(
+                        text = "${mealSlotLabel(it.mealSlot)}: ${it.dish.name}",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Text(
+                        text = formatDate(it.date),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (!it.dish.description.isNullOrBlank()) Text(it.dish.description)
+                }
             }
         }
     }

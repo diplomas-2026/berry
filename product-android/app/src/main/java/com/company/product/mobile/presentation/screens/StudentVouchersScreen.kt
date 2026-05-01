@@ -28,10 +28,17 @@ fun StudentVouchersScreen(repo: AppRepository) {
     ScreenContainer("Мои талоны") {
         if (loading) CenterLoading()
         if (error != null) ErrorCard(error!!)
-        vouchers.forEach {
-            SectionCard(title = "Талон #${it.id}", subtitle = formatDate(it.issueDate)) {
-                Text("Приём пищи: ${mealSlotLabel(it.mealSlot)}")
-                StatusPill(voucherStatusLabel(it.status))
+        if (vouchers.isEmpty()) {
+            EmptyStateCard(
+                title = "Талоны не найдены",
+                subtitle = "На текущий момент у вас нет доступных талонов"
+            )
+        } else {
+            vouchers.forEach {
+                SectionCard(title = "Талон #${it.id}", subtitle = formatDate(it.issueDate)) {
+                    Text("Приём пищи: ${mealSlotLabel(it.mealSlot)}")
+                    StatusPill(voucherStatusLabel(it.status))
+                }
             }
         }
     }
