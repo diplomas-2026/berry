@@ -18,10 +18,20 @@ public class Dish {
     private String name;
 
     private String description;
+
+    @Column(name = "proteins_per_100g")
     private BigDecimal proteinsPer100g;
+
+    @Column(name = "fats_per_100g")
     private BigDecimal fatsPer100g;
+
+    @Column(name = "carbs_per_100g")
     private BigDecimal carbsPer100g;
+
+    @Column(name = "calories_per_100g")
     private BigDecimal caloriesPer100g;
+
+    @Column(name = "photo_path")
     private String photoPath;
 
     @ManyToOne
