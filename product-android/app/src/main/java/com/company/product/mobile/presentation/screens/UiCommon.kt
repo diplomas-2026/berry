@@ -45,6 +45,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
@@ -117,12 +118,14 @@ fun SectionCard(
     title: String,
     subtitle: String? = null,
     containerColor: Color = MaterialTheme.colorScheme.surface.copy(alpha = 0.92f),
+    borderColor: Color? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = containerColor),
+        border = borderColor?.let { BorderStroke(1.dp, it) },
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
         Column(
@@ -212,6 +215,8 @@ fun TileCard(
     title: String,
     icon: ImageVector,
     modifier: Modifier = Modifier,
+    containerColor: Color = MaterialTheme.colorScheme.surface.copy(alpha = 0.98f),
+    borderColor: Color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.20f),
     onClick: () -> Unit
 ) {
     Card(
@@ -219,7 +224,8 @@ fun TileCard(
             .aspectRatio(1.35f)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f)),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        border = BorderStroke(1.dp, borderColor),
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
         Column(

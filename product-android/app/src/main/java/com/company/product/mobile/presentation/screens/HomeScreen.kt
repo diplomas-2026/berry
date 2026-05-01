@@ -32,7 +32,8 @@ fun HomeScreen(session: SessionUi?, onOpen: (String) -> Unit, onLogout: () -> Un
         SectionCard(
             title = "Разделы",
             subtitle = "Откройте нужный экран",
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.20f)
+            containerColor = MaterialTheme.colorScheme.background.copy(alpha = 0.72f),
+            borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.40f)
         ) {
             val entries = when (session?.role) {
                 "STUDENT" -> listOf(
@@ -40,19 +41,26 @@ fun HomeScreen(session: SessionUi?, onOpen: (String) -> Unit, onLogout: () -> Un
                     HomeTile("Мои талоны", Icons.Default.Badge) { onOpen("student_vouchers") },
                     HomeTile("Мой QR", Icons.Default.QrCode2) { onOpen("student_qr") }
                 )
+
                 "CURATOR" -> listOf(
-                    HomeTile("Студенты группы", Icons.Default.People) { onOpen("curator_students") },
+                    HomeTile(
+                        "Студенты группы",
+                        Icons.Default.People
+                    ) { onOpen("curator_students") },
                     HomeTile("Выдача талонов", Icons.Default.Badge) { onOpen("curator_issue") }
                 )
+
                 "CHEF" -> listOf(
                     HomeTile("Текущее меню", Icons.Default.RestaurantMenu) { onOpen("chef_menu") },
                     HomeTile("Сканирование", Icons.Default.Dining) { onOpen("chef_scan") }
                 )
+
                 "ADMIN" -> listOf(
                     HomeTile("Пользователи", Icons.Default.People) { onOpen("admin_users") }
                 )
+
                 else -> emptyList()
-            )
+            }
 
             TileGrid(
                 entries + listOf(
