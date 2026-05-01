@@ -1,12 +1,8 @@
 package com.company.product.mobile.presentation.screens
 
 import android.graphics.Bitmap
-import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -21,9 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.company.product.mobile.data.remote.QrPayload
 import com.company.product.mobile.data.repository.AppRepository
@@ -69,13 +62,6 @@ fun StudentQrScreen(repo: AppRepository) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-
-            SectionCard(
-                title = "Payload",
-                subtitle = "Можно скопировать строку, если нужно проверить сканирование"
-            ) {
-                QrPayloadRow(payload = payload)
-            }
         }
     }
 }
@@ -99,33 +85,6 @@ private fun QrPreview(payload: String) {
                 contentDescription = "QR-код студента",
                 modifier = Modifier.size(240.dp)
             )
-        }
-    }
-}
-
-@Composable
-private fun QrPayloadRow(payload: String) {
-    val clipboard = LocalClipboardManager.current
-    val context = LocalContext.current
-
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(
-            text = payload,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Button(
-            onClick = {
-                clipboard.setText(AnnotatedString(payload))
-                Toast.makeText(context, "Payload скопирован", Toast.LENGTH_SHORT).show()
-            },
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.85f),
-                contentColor = MaterialTheme.colorScheme.onSurface
-            )
-        ) {
-            Text("Скопировать payload")
         }
     }
 }
