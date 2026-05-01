@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: product-api
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/berry}
+    username: ${DB_USER:berry}
+    password: ${DB_PASSWORD:berry}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+
+server:
+  port: 8080
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:very-secret-key-for-local-dev-please-change}
+    expiration-minutes: 480
+  storage:
+    root-dir: ${STORAGE_ROOT:uploads}
