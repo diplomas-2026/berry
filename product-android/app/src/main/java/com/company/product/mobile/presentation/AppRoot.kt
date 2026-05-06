@@ -144,8 +144,52 @@ fun AppRoot() {
                         onDishClick = { dishId -> nav.navigate("dish_details/$dishId") }
                     )
                 }
-                composable("admin_users") { AdminUsersScreen(appState.repository()) }
-                composable("admin_groups") { AdminGroupsScreen(appState.repository()) }
+                composable("admin_users") {
+                    AdminUsersScreen(
+                        repo = appState.repository(),
+                        onCreateUser = { nav.navigate("admin_user_create") },
+                        onEditUser = { userId -> nav.navigate("admin_user_edit/$userId") }
+                    )
+                }
+                composable("admin_user_create") {
+                    AdminUserEditorScreen(
+                        repo = appState.repository(),
+                        onDone = { nav.popBackStack() }
+                    )
+                }
+                composable(
+                    route = "admin_user_edit/{userId}",
+                    arguments = listOf(navArgument("userId") { type = NavType.LongType })
+                ) { backStackEntry ->
+                    AdminUserEditorScreen(
+                        repo = appState.repository(),
+                        userId = backStackEntry.arguments?.getLong("userId"),
+                        onDone = { nav.popBackStack() }
+                    )
+                }
+                composable("admin_groups") {
+                    AdminGroupsScreen(
+                        repo = appState.repository(),
+                        onCreateGroup = { nav.navigate("admin_group_create") },
+                        onEditGroup = { groupId -> nav.navigate("admin_group_edit/$groupId") }
+                    )
+                }
+                composable("admin_group_create") {
+                    AdminGroupEditorScreen(
+                        repo = appState.repository(),
+                        onDone = { nav.popBackStack() }
+                    )
+                }
+                composable(
+                    route = "admin_group_edit/{groupId}",
+                    arguments = listOf(navArgument("groupId") { type = NavType.LongType })
+                ) { backStackEntry ->
+                    AdminGroupEditorScreen(
+                        repo = appState.repository(),
+                        groupId = backStackEntry.arguments?.getLong("groupId"),
+                        onDone = { nav.popBackStack() }
+                    )
+                }
                 composable("profile") { ProfileScreen(appState) }
             }
         }
