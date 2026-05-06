@@ -25,7 +25,8 @@ class AppRepository(
 
     suspend fun me(): UserDto = api.me()
 
-    suspend fun studentMenu() = api.studentTodayMenu()
+    suspend fun studentMenu(date: String) = api.studentMenu(date)
+    suspend fun studentMenuDates() = api.studentMenuDates()
     suspend fun studentVouchers() = api.studentVouchers()
     suspend fun studentQr() = api.studentQr()
 

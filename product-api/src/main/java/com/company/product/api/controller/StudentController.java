@@ -7,6 +7,7 @@ import com.company.product.api.service.CurrentUserService;
 import com.company.product.api.service.DtoMapper;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,8 +38,18 @@ public class StudentController {
 
     @GetMapping("/menu/today")
     public List<?> todayMenu() {
-        LocalDate today = LocalDate.now();
-        return menuItemRepository.findByMenuDateOrderByMealSlotAsc(today).stream().map(mapper::toMenuItemDto).toList();
+        return menu(LocalDate.now());
+    }
+
+    @GetMapping("/menu")
+    public List<?> menu(@RequestParam(required = false) LocalDate date) {
+        LocalDate menuDate = date == null ? LocalDate.now() : date;
+        return menuItemRepository.findByMenuDateOrderByMealSlotAsc(menuDate).stream().map(mapper::toMenuItemDto).toList();
+    }
+
+    @GetMapping("/menu/dates")
+    public List<LocalDate> menuDates() {
+        return menuItemRepository.findDistinctMenuDates();
     }
 
     @GetMapping("/qr")

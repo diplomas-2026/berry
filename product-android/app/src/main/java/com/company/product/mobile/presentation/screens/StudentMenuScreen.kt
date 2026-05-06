@@ -29,7 +29,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun StudentMenuScreen(repo: AppRepository, onDishClick: (Long) -> Unit = {}) {
     var items by remember { mutableStateOf<List<MenuItemDto>>(emptyList()) }
-    var loading by remember { mutableStateOf(true) }
+    var availableDates by remember { mutableStateOf<List<String>>(emptyList()) }
+    var loadingDates by remember { mutableStateOf(true) }
+    var loadingMenu by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var selectedDate by remember { mutableStateOf<String?>(null) }
     var query by remember { mutableStateOf("") }
@@ -40,19 +42,36 @@ fun StudentMenuScreen(repo: AppRepository, onDishClick: (Long) -> Unit = {}) {
     LaunchedEffect(Unit) {
         scope.launch {
             try {
-                items = repo.studentMenu()
-                selectedDate = items.firstOrNull()?.date
+                error = null
+                availableDates = repo.studentMenuDates().sortedDescending()
+                val today = java.time.LocalDate.now().toString()
+                selectedDate = when {
+                    today in availableDates -> today
+                    availableDates.isNotEmpty() -> availableDates.first()
+                    else -> null
+                }
             } catch (e: Exception) {
                 error = e.message
             } finally {
-                loading = false
+                loadingDates = false
             }
         }
     }
 
-    val groupedByDate = remember(items) { items.groupBy { it.date } }
-    val availableDates = remember(items) { items.map { it.date }.distinct() }
-    val selectedItems = selectedDate?.let { groupedByDate[it].orEmpty() }.orEmpty()
+    LaunchedEffect(selectedDate) {
+        val date = selectedDate ?: return@LaunchedEffect
+        loadingMenu = true
+        try {
+            error = null
+            items = repo.studentMenu(date)
+        } catch (e: Exception) {
+            error = e.message
+        } finally {
+            loadingMenu = false
+        }
+    }
+
+    val selectedItems = items
     val visibleItems = remember(selectedItems, query, mealFilter, sortMode) {
         selectedItems
             .filter { item ->
@@ -72,10 +91,10 @@ fun StudentMenuScreen(repo: AppRepository, onDishClick: (Long) -> Unit = {}) {
     }
 
     ScreenContainer("Меню") {
-        if (loading) CenterLoading()
+        if (loadingDates || loadingMenu) CenterLoading()
         if (error != null) ErrorCard(error!!)
 
-        if (!loading && error == null && availableDates.isNotEmpty()) {
+        if (!loadingDates && error == null && availableDates.isNotEmpty()) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("Выберите дату", style = MaterialTheme.typography.titleMedium)
                 Column(modifier = Modifier.horizontalScroll(rememberScrollState())) {
@@ -131,7 +150,12 @@ fun StudentMenuScreen(repo: AppRepository, onDishClick: (Long) -> Unit = {}) {
             }
         }
 
-        if (!loading && error == null) {
+        if (!loadingDates && error == null && availableDates.isEmpty()) {
+            EmptyStateCard(
+                title = "Меню пока не создано",
+                subtitle = "Повар ещё не добавил ни одной даты меню"
+            )
+        } else if (!loadingDates && error == null) {
             if (visibleItems.isEmpty()) {
                 EmptyStateCard(
                     title = "На выбранную дату меню нет",

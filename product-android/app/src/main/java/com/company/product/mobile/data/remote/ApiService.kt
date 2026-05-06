@@ -18,8 +18,11 @@ interface ApiService {
     @GET("api/auth/me")
     suspend fun me(): UserDto
 
-    @GET("api/student/menu/today")
-    suspend fun studentTodayMenu(): List<MenuItemDto>
+    @GET("api/student/menu")
+    suspend fun studentMenu(@retrofit2.http.Query("date") date: String): List<MenuItemDto>
+
+    @GET("api/student/menu/dates")
+    suspend fun studentMenuDates(): List<String>
 
     @GET("api/student/vouchers")
     suspend fun studentVouchers(): List<VoucherDto>
