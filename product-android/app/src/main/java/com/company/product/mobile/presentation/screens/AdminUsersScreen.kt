@@ -152,7 +152,7 @@ fun AdminUsersScreen(
                         title = user.fullName,
                         subtitle = "${user.email} • ${roleLabel(user.role)}"
                     ) {
-                        StatusPill(if (user.active) "Доступ включён" else "Доступ отключён")
+                        StatusPill(if (user.active) "Активен" else "Удалён")
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             TextButton(onClick = { onEditUser(user.id) }) {
                                 Icon(imageVector = Icons.Default.Edit, contentDescription = null)
@@ -176,7 +176,7 @@ fun AdminUsersScreen(
                                         }
                                     }
                                 }) {
-                                Text(if (user.active) "Отключить доступ" else "Включить доступ")
+                                Text(if (user.active) "Удалить" else "Восстановить")
                             }
                         }
                     }
