@@ -62,6 +62,7 @@ fun StudentVouchersScreen(repo: AppRepository) {
                 }
             )
     }
+    val groupedVouchers = remember(visibleVouchers) { groupVouchersByDate(visibleVouchers) }
 
     ScreenContainer("Мои талоны") {
         SectionCard(title = "Поиск и фильтры", subtitle = "Можно быстро найти нужный талон") {
@@ -105,12 +106,8 @@ fun StudentVouchersScreen(repo: AppRepository) {
                 }
             )
         } else {
-            visibleVouchers.forEach {
-                SectionCard(title = "Талон #${it.id}", subtitle = formatDate(it.issueDate)) {
-                    Text("Приём пищи: ${mealSlotLabel(it.mealSlot)}")
-                    Text("Дата: ${formatDate(it.issueDate)}")
-                    StatusPill(voucherStatusLabel(it.status))
-                }
+            groupedVouchers.forEach { group ->
+                VoucherDayCard(group = group)
             }
         }
     }

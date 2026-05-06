@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -85,11 +84,11 @@ fun CuratorIssueVoucherScreen(
 
     val visibleVouchers = remember(vouchers, voucherQuery, voucherFilter, voucherSort) {
         vouchers
-                    .filter { voucher ->
-                        val matchesQuery = voucherQuery.isBlank() ||
-                            voucher.studentName.contains(voucherQuery, ignoreCase = true) ||
-                            mealSlotLabel(voucher.mealSlot).contains(voucherQuery, ignoreCase = true) ||
-                            voucherStatusLabel(voucher.status).contains(voucherQuery, ignoreCase = true) ||
+            .filter { voucher ->
+                val matchesQuery = voucherQuery.isBlank() ||
+                    voucher.studentName.contains(voucherQuery, ignoreCase = true) ||
+                    mealSlotLabel(voucher.mealSlot).contains(voucherQuery, ignoreCase = true) ||
+                    voucherStatusLabel(voucher.status).contains(voucherQuery, ignoreCase = true) ||
                     formatDate(voucher.issueDate).contains(voucherQuery, ignoreCase = true)
                 val matchesFilter = voucherFilter == "ALL" || voucher.status.uppercase() == voucherFilter
                 matchesQuery && matchesFilter
@@ -98,10 +97,11 @@ fun CuratorIssueVoucherScreen(
                 when (voucherSort) {
                     "status" -> compareBy<VoucherDto> { voucherStatusSortIndex(it.status) }.thenByDescending { it.issueDate }
                     "slot" -> compareBy<VoucherDto> { mealSlotSortIndex(it.mealSlot) }.thenByDescending { it.issueDate }
-                    else -> compareByDescending<VoucherDto> { it.issueDate }.thenBy { it.mealSlot }
+                    else -> compareByDescending<VoucherDto> { it.issueDate }.thenBy { mealSlotSortIndex(it.mealSlot) }
                 }
             )
     }
+    val groupedVouchers = remember(visibleVouchers) { groupVouchersByDate(visibleVouchers) }
 
     ScreenContainer("Выдача талона") {
         if (loading) {
@@ -258,23 +258,11 @@ fun CuratorIssueVoucherScreen(
                     }
                 )
             } else {
-                visibleVouchers.forEach { voucher ->
-                    val canDelete = voucher.status.uppercase() == "ISSUED" && runCatching { LocalDate.parse(voucher.issueDate) }.getOrNull()?.isAfter(LocalDate.now()) == true
-                    SectionCard(
-                        title = "Талон #${voucher.id}",
-                        subtitle = "${mealSlotLabel(voucher.mealSlot)} • ${voucherStatusLabel(voucher.status)} • ${formatDate(voucher.issueDate)}"
-                    ) {
-                        Text("Приём пищи: ${mealSlotLabel(voucher.mealSlot)}")
-                        Text("Статус: ${voucherStatusLabel(voucher.status)}")
-                        Text("Студент: ${voucher.studentName}")
-                        if (canDelete) {
-                            TextButton(onClick = { deleteTarget = voucher }) {
-                                Icon(imageVector = Icons.Default.Delete, contentDescription = null)
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text("Удалить талон")
-                            }
-                        }
-                    }
+                groupedVouchers.forEach { group ->
+                    VoucherDayCard(
+                        group = group,
+                        onDeleteVoucher = { voucher -> deleteTarget = voucher }
+                    )
                 }
             }
 

@@ -191,20 +191,7 @@ fun CuratorStudentsScreen(
                         onClick = {
                             onIssueVoucher(student.id)
                         }
-                    ) {
-                        MediaFrame(
-                            url = student.avatarUrl,
-                            placeholderTitle = "Фото отсутствует",
-                            placeholderSubtitle = "Можно добавить в профиле",
-                            aspectRatio = 1f
-                        )
-                        Button(
-                            onClick = { onIssueVoucher(student.id) },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text("Выдать талон")
-                        }
-                    }
+                    ) {}
                 }
             }
         }
