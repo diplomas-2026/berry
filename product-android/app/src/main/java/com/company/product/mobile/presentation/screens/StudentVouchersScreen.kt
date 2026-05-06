@@ -108,6 +108,7 @@ fun StudentVouchersScreen(repo: AppRepository) {
             visibleVouchers.forEach {
                 SectionCard(title = "Талон #${it.id}", subtitle = formatDate(it.issueDate)) {
                     Text("Приём пищи: ${mealSlotLabel(it.mealSlot)}")
+                    Text("Дата: ${formatDate(it.issueDate)}")
                     StatusPill(voucherStatusLabel(it.status))
                 }
             }

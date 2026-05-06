@@ -264,6 +264,8 @@ fun CuratorIssueVoucherScreen(
                         title = "Талон #${voucher.id}",
                         subtitle = "${mealSlotLabel(voucher.mealSlot)} • ${voucherStatusLabel(voucher.status)} • ${formatDate(voucher.issueDate)}"
                     ) {
+                        Text("Приём пищи: ${mealSlotLabel(voucher.mealSlot)}")
+                        Text("Статус: ${voucherStatusLabel(voucher.status)}")
                         Text("Студент: ${voucher.studentName}")
                         if (canDelete) {
                             TextButton(onClick = { deleteTarget = voucher }) {
