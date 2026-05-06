@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Save
@@ -90,18 +91,22 @@ fun AdminGroupEditorScreen(
                 )
 
                 Text("Куратор")
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(
-                        selected = curatorId == null,
-                        onClick = { curatorId = null },
-                        label = { Text("Без куратора") }
-                    )
-                    curators.forEach { curator ->
+                LazyRow {
+                    item {
                         FilterChip(
-                            selected = curatorId == curator.id,
-                            onClick = { curatorId = curator.id },
-                            label = { Text(curator.fullName) }
+                            selected = curatorId == null,
+                            onClick = { curatorId = null },
+                            label = { Text("Без куратора") },
+                            modifier = Modifier.padding(horizontal = 3.dp)
                         )
+                        curators.forEach { curator ->
+                            FilterChip(
+                                selected = curatorId == curator.id,
+                                onClick = { curatorId = curator.id },
+                                label = { Text(curator.fullName) },
+                                modifier = Modifier.padding(horizontal = 3.dp)
+                            )
+                        }
                     }
                 }
 

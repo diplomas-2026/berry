@@ -131,7 +131,6 @@ fun AdminUsersScreen(
                         }
                     }
                 }
-                Button(onClick = { reload() }, modifier = Modifier.fillMaxWidth()) { Text("Обновить список") }
             }
 
             if (loading) {
@@ -153,7 +152,7 @@ fun AdminUsersScreen(
                         title = user.fullName,
                         subtitle = "${user.email} • ${roleLabel(user.role)}"
                     ) {
-                        StatusPill(if (user.active) "Активен" else "Отключён")
+                        StatusPill(if (user.active) "Доступ включён" else "Доступ отключён")
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             TextButton(onClick = { onEditUser(user.id) }) {
                                 Icon(imageVector = Icons.Default.Edit, contentDescription = null)
@@ -174,10 +173,10 @@ fun AdminUsersScreen(
                                         reload()
                                     } catch (e: Exception) {
                                         error = e.message
+                                        }
                                     }
-                                }
-                            }) {
-                                Text(if (user.active) "Деактивировать" else "Активировать")
+                                }) {
+                                Text(if (user.active) "Отключить доступ" else "Включить доступ")
                             }
                         }
                     }

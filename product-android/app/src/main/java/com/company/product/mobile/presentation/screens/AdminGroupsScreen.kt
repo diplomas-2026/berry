@@ -102,7 +102,6 @@ fun AdminGroupsScreen(
                         FilterChip(selected = sortMode == value, onClick = { sortMode = value }, label = { Text(label) })
                     }
                 }
-                Button(onClick = { reload() }, modifier = Modifier.fillMaxWidth()) { Text("Обновить список") }
             }
             if (loading) CenterLoading()
             if (visibleGroups.isEmpty() && !loading) {
@@ -116,7 +115,6 @@ fun AdminGroupsScreen(
                         title = group.name,
                         subtitle = group.curatorName ?: "Куратор не назначен"
                     ) {
-                        StatusPill("ID: ${group.id}")
                         TextButton(onClick = { onEditGroup(group.id) }) {
                             Icon(imageVector = Icons.Default.Edit, contentDescription = null)
                             Spacer(modifier = Modifier.width(6.dp))
