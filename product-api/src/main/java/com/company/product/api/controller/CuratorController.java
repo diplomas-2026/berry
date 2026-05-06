@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/curator")
@@ -59,6 +60,28 @@ public class CuratorController {
                 .map(GroupMember::getStudent)
                 .map(mapper::toUserDto)
                 .toList();
+    }
+
+    @GetMapping("/students/{studentId}/vouchers")
+    public List<?> studentVouchers(@PathVariable Long studentId) {
+        Long curatorId = currentUserService.requireUser().getId();
+        if (!groupMemberRepository.existsByGroupCuratorIdAndStudentId(curatorId, studentId)) {
+            throw new IllegalArgumentException("Студент не относится к группе куратора");
+        }
+        return voucherRepository.findByStudentIdOrderByIssueDateDesc(studentId).stream().map(mapper::toVoucherDto).toList();
+    }
+
+    @DeleteMapping("/vouchers/{voucherId}")
+    public void deleteVoucher(@PathVariable Long voucherId) {
+        Long curatorId = currentUserService.requireUser().getId();
+        MealVoucher voucher = voucherRepository.findById(voucherId).orElseThrow();
+        if (!groupMemberRepository.existsByGroupCuratorIdAndStudentId(curatorId, voucher.getStudent().getId())) {
+            throw new IllegalArgumentException("Студент не относится к группе куратора");
+        }
+        if (!voucher.getIssueDate().isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("Можно удалить только будущий талон");
+        }
+        voucherRepository.delete(voucher);
     }
 
     @PostMapping("/vouchers/issue")

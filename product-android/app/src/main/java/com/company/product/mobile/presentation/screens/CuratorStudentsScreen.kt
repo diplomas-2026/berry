@@ -187,7 +187,10 @@ fun CuratorStudentsScreen(
                 visibleStudents.forEach { student ->
                     SectionCard(
                         title = student.fullName,
-                        subtitle = student.email
+                        subtitle = student.email,
+                        onClick = {
+                            onIssueVoucher(student.id)
+                        }
                     ) {
                         MediaFrame(
                             url = student.avatarUrl,

@@ -36,8 +36,14 @@ interface ApiService {
     @GET("api/curator/groups/{id}/students")
     suspend fun curatorGroupStudents(@Path("id") id: Long): List<UserDto>
 
+    @GET("api/curator/students/{id}/vouchers")
+    suspend fun curatorStudentVouchers(@Path("id") id: Long): List<VoucherDto>
+
     @POST("api/curator/vouchers/issue")
     suspend fun issueVoucher(@Body body: IssueVoucherRequest): List<VoucherDto>
+
+    @DELETE("api/curator/vouchers/{id}")
+    suspend fun deleteCuratorVoucher(@Path("id") id: Long)
 
     @GET("api/chef/dishes")
     suspend fun chefDishes(): List<DishDto>

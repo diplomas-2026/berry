@@ -32,8 +32,10 @@ class AppRepository(
     suspend fun curatorStudents() = api.curatorStudents()
     suspend fun curatorGroups() = api.curatorGroups()
     suspend fun curatorGroupStudents(groupId: Long) = api.curatorGroupStudents(groupId)
+    suspend fun curatorStudentVouchers(studentId: Long) = api.curatorStudentVouchers(studentId)
     suspend fun issueVouchers(studentId: Long, date: String, slots: List<String>) =
         api.issueVoucher(IssueVoucherRequest(studentId, date, slots))
+    suspend fun deleteCuratorVoucher(voucherId: Long) = api.deleteCuratorVoucher(voucherId)
 
     suspend fun chefDishes() = api.chefDishes()
     suspend fun dish(id: Long) = api.dish(id)
