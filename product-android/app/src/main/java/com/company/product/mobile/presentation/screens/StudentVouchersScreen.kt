@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FilterChip
@@ -77,9 +79,16 @@ fun StudentVouchersScreen(repo: AppRepository) {
                 )
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Статус", style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        listOf("ALL" to "Все", "ISSUED" to "Выданы", "REDEEMED" to "Погашены", "EXPIRED" to "Просрочены", "CANCELLED" to "Отменены").forEach { (value, label) ->
-                            FilterChip(selected = statusFilter == value, onClick = { statusFilter = value }, label = { Text(label) })
+                    LazyRow {
+                        item {
+                            listOf("ALL" to "Все", "ISSUED" to "Выданы", "REDEEMED" to "Погашены", "EXPIRED" to "Просрочены", "CANCELLED" to "Отменены").forEach { (value, label) ->
+                                FilterChip(
+                                    selected = statusFilter == value,
+                                    onClick = { statusFilter = value },
+                                    label = { Text(label) },
+                                    modifier = Modifier.padding(horizontal = 3.dp)
+                                )
+                            }
                         }
                     }
                 }
