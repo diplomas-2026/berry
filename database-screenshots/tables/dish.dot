@@ -1,0 +1,7 @@
+digraph single_table {
+  graph [rankdir=TB, fontsize=18];
+  node [shape=plain, fontname="Arial"];
+  label="berry — dish";
+  labelloc=t;
+  "dish" [label=<<TABLE BORDER="1" CELLBORDER="1" CELLSPACING="0" CELLPADDING="6"><TR><TD BGCOLOR="#eeeeee" COLSPAN="3"><B>dish</B></TD></TR><TR><TD><B>Поле</B></TD><TD><B>Тип</B></TD><TD><B>Модификаторы</B></TD></TR><TR><TD ALIGN="LEFT">id</TD><TD ALIGN="LEFT">bigint(64,0)</TD><TD ALIGN="LEFT">PK, NOT NULL, DEFAULT nextval(&#x27;dish_id_seq&#x27;::regclass)</TD></TR><TR><TD ALIGN="LEFT">name</TD><TD ALIGN="LEFT">character varying(255)</TD><TD ALIGN="LEFT">NOT NULL</TD></TR><TR><TD ALIGN="LEFT">description</TD><TD ALIGN="LEFT">text</TD><TD ALIGN="LEFT"></TD></TR><TR><TD ALIGN="LEFT">proteins_per_100g</TD><TD ALIGN="LEFT">numeric(6,2)</TD><TD ALIGN="LEFT"></TD></TR><TR><TD ALIGN="LEFT">fats_per_100g</TD><TD ALIGN="LEFT">numeric(6,2)</TD><TD ALIGN="LEFT"></TD></TR><TR><TD ALIGN="LEFT">carbs_per_100g</TD><TD ALIGN="LEFT">numeric(6,2)</TD><TD ALIGN="LEFT"></TD></TR><TR><TD ALIGN="LEFT">calories_per_100g</TD><TD ALIGN="LEFT">numeric(6,2)</TD><TD ALIGN="LEFT"></TD></TR><TR><TD ALIGN="LEFT">photo_path</TD><TD ALIGN="LEFT">character varying(512)</TD><TD ALIGN="LEFT"></TD></TR><TR><TD ALIGN="LEFT">created_by_chef_id</TD><TD ALIGN="LEFT">bigint(64,0)</TD><TD ALIGN="LEFT">FK → app_user.id</TD></TR></TABLE>>];
+}
